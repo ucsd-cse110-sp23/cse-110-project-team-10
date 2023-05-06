@@ -10,6 +10,7 @@ import javax.sound.sampled.*;
 import java.awt.event.*;
 
 class Question extends JPanel{
+    JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
 
@@ -17,18 +18,56 @@ class Question extends JPanel{
         
         this.setPreferredSize(new Dimension(400,200)); //set size of question
         this.setBackground(gray);
-        this.setLayout(new BorderLayout()); //set layout of the question
+        this.setLayout(new BorderLayout());
         
-        questionContent = new JLabel(""); //create question content field feild
-        questionContent.setBorder(BorderFactory.createEmptyBorder());
-        questionContent.setBackground(gray); //set the background color of question field
+        indexQ = new JLabel("Q:");
+        indexQ.setPreferredSize(new Dimension(20, 20));
+        indexQ.setHorizontalAlignment(JLabel.CENTER);
+        this.add(indexQ,BorderLayout.WEST);
 
-        this.add(questionContent, BorderLayout.CENTER);    
+        questionContent = new JLabel("What is your name?");
+        questionContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        this.add(questionContent, BorderLayout.CENTER);
     }
     public void updateContent(String content){
         questionContent.setText(content);
     }
+}
+class Answer extends JPanel{
+    JLabel indexA;
+    JLabel answerContent;
+    Color green = new Color(188,226,158);
+    
+    Answer() {
+        this.setPreferredSize(new Dimension(400, 200));
+        this.setBackground(green);
+        this.setLayout(new BorderLayout());
 
+        indexA = new JLabel("A:");
+        indexA.setPreferredSize(new Dimension(20, 20));
+        indexA.setHorizontalAlignment(JLabel.CENTER);
+        this.add(indexA,BorderLayout.WEST);
+
+        answerContent = new JLabel("I am AudioGPT.");
+        answerContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        this.add(answerContent, BorderLayout.CENTER);
+    }
+    public void updateContent(String content) {
+        answerContent.setText(content);
+    }
+}
+
+class QandA extends JPanel{
+    Color backgroundColor = new Color(240,248,255);
+
+    QandA() {
+        GridLayout layout = new GridLayout(2,1);
+        layout.setVgap(5);
+
+        this.setLayout(layout);
+        this.setPreferredSize(new Dimension(600, 560));
+        this.setBackground(backgroundColor);
+    }
 }
 
 class Footer extends JPanel{
@@ -94,6 +133,8 @@ class Header extends JPanel{
 class AppFrame extends JFrame {
     private Header header;
     private Footer footer;
+    private QandA qanda;
+    
     
     private JButton askButton;
     private JButton stopButton;
@@ -109,9 +150,12 @@ class AppFrame extends JFrame {
 
         header = new Header();
         footer = new Footer();
+        qanda = new QandA();
+        
         
         this.add(header, BorderLayout.NORTH);
         this.add(footer, BorderLayout.SOUTH);
+        this.add(qanda, BorderLayout.CENTER);
 
         askButton = footer.getaskButton();
         stopButton = footer.getstopButton();
@@ -119,6 +163,7 @@ class AppFrame extends JFrame {
 
         audioFormat = getAudioFormat();
         addListeners();
+        revalidate();
     }
     
     public void addListeners() {
@@ -135,6 +180,12 @@ class AppFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
               stopRecording();
+              qanda.removeAll();
+              Question question = new Question();
+              qanda.add(question);
+              Answer answer = new Answer();
+              qanda.add(answer);
+              revalidate();
             }
           }
         );
@@ -204,13 +255,6 @@ class AppFrame extends JFrame {
       }
 
 }
-
-
-
-
-
-
-
 
  public class AudioGPT {
     public static void main(String[] args) {
