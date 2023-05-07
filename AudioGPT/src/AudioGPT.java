@@ -13,6 +13,7 @@ class Question extends JPanel{
     JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
+    String content;
 
     Question() {
         
@@ -28,9 +29,15 @@ class Question extends JPanel{
         questionContent = new JLabel("What is your name?");
         questionContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         this.add(questionContent, BorderLayout.CENTER);
+
     }
     public void updateContent(String content){
-        questionContent.setText(content);
+      this.content = content;  
+      questionContent.setText(content);
+
+    }
+    public String getContent(){
+      return content;
     }
 }
 class Answer extends JPanel{
@@ -144,6 +151,7 @@ class AppFrame extends JFrame {
     private JLabel recordingLabel;
 
     private Whisper whisper;
+    private ChatGPT chatgpt;
 
     AppFrame() {
         this.setSize(1000, 600);
@@ -154,6 +162,7 @@ class AppFrame extends JFrame {
         footer = new Footer();
         qanda = new QandA();
         whisper = new Whisper();
+        chatgpt = new ChatGPT();
         
         this.add(header, BorderLayout.NORTH);
         this.add(footer, BorderLayout.SOUTH);
@@ -212,13 +221,17 @@ class AppFrame extends JFrame {
                     }
                   });
                 }
-              } catch (IOException exc) {
-                exc.printStackTrace();
-              }
+              
               qanda.add(question);
+              
               Answer answer = new Answer();
+              answer.updateContent(chatgpt.getAnswer(question.getContent()));
               qanda.add(answer);
               revalidate();
+              }
+              catch (Exception exc) {
+                exc.printStackTrace();
+              }
             }
           }
         );
