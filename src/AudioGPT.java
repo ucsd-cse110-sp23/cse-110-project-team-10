@@ -13,7 +13,7 @@ class Question extends JPanel{
     JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
-    String content;
+    
 
     Question() {
         
@@ -32,13 +32,11 @@ class Question extends JPanel{
 
     }
     public void updateContent(String content){
-      this.content = content;  
+        
       questionContent.setText(content);
 
     }
-    public String getContent(){
-      return content;
-    }
+    
 }
 class Answer extends JPanel{
     JLabel indexA;
@@ -225,7 +223,7 @@ class AppFrame extends JFrame {
               qanda.add(question);
               
               Answer answer = new Answer();
-              answer.updateContent(chatgpt.getAnswer(question.getContent()));
+              answer.updateContent(chatgpt.getAnswer(transcription));
               qanda.add(answer);
               revalidate();
               }
