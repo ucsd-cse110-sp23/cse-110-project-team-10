@@ -13,6 +13,7 @@ class Question extends JPanel{
     JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
+    String content;
 
     Question() {
         
@@ -28,9 +29,15 @@ class Question extends JPanel{
         questionContent = new JLabel("What is your name?");
         questionContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         this.add(questionContent, BorderLayout.CENTER);
+
     }
     public void updateContent(String content){
-        questionContent.setText(content);
+      this.content = content;  
+      questionContent.setText(content);
+
+    }
+    public String getContent(){
+      return content;
     }
 }
 class Answer extends JPanel{
@@ -143,6 +150,9 @@ class AppFrame extends JFrame {
     private TargetDataLine targetDataLine;
     private JLabel recordingLabel;
 
+    private Whisper whisper;
+    private ChatGPT chatgpt;
+
     AppFrame() {
         this.setSize(1000, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -151,7 +161,8 @@ class AppFrame extends JFrame {
         header = new Header();
         footer = new Footer();
         qanda = new QandA();
-        
+        whisper = new Whisper();
+        chatgpt = new ChatGPT();
         
         this.add(header, BorderLayout.NORTH);
         this.add(footer, BorderLayout.SOUTH);
@@ -160,6 +171,8 @@ class AppFrame extends JFrame {
         askButton = footer.getaskButton();
         stopButton = footer.getstopButton();
         recordingLabel = footer.getrecordingLabel();
+        
+        
 
         audioFormat = getAudioFormat();
         addListeners();
@@ -182,10 +195,43 @@ class AppFrame extends JFrame {
               stopRecording();
               qanda.removeAll();
               Question question = new Question();
+              
+              try {
+                String transcription = whisper.transcribe("recording.wav");
+                if (transcription != null) {
+                  SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                      question.updateContent(transcription);
+    
+                      // Refresh the QandA panel
+                      qanda.revalidate();
+                      qanda.repaint();
+                    }
+                  });
+                } else {
+                  SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                      question.updateContent("Error: Could not transcribe audio");
+                      
+                      // Refresh the QandA panel
+                      qanda.revalidate();
+                      qanda.repaint();
+                    }
+                  });
+                }
+              
               qanda.add(question);
+              
               Answer answer = new Answer();
+              answer.updateContent(chatgpt.getAnswer(question.getContent()));
               qanda.add(answer);
               revalidate();
+              }
+              catch (Exception exc) {
+                exc.printStackTrace();
+              }
             }
           }
         );
