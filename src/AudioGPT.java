@@ -1,25 +1,23 @@
 import java.awt.*;
 import java.io.*;
 import java.util.*;
+
 import javax.print.DocFlavor.STRING;
 import javax.swing.*;
 import javax.swing.border.Border;
+
 import javax.sound.sampled.*;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
-import javax.swing.border.AbstractBorder;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 class Question extends JPanel{
     JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
+    Whisper whisper;
     
 
-    Question() {
-        
+    Question(Whisper whisper) {
+        this.whisper = whisper;
         this.setPreferredSize(new Dimension(400,200)); //set size of question
         this.setBackground(gray);
         this.setLayout(new BorderLayout());
@@ -34,10 +32,32 @@ class Question extends JPanel{
         this.add(questionContent, BorderLayout.CENTER);
 
     }
-    public void updateContent(String content){
-        
-      questionContent.setText(content);
-
+    public String updateContent(){
+      String transcription;
+      try {
+          transcription = whisper.transcribe("recording.wav");
+        if (transcription != null) {
+          SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+              questionContent.setText(transcription);
+            }
+          });
+        } else {
+          SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+              questionContent.setText("Error: Could not transcribe audio");   
+            }
+          });
+        }
+        return transcription;
+      }
+      catch (Exception exc) {
+        exc.printStackTrace();
+        return "Error: Could not transcribe audio";
+      }
+      
     }
     
 }
@@ -45,8 +65,10 @@ class Answer extends JPanel{
     JLabel indexA;
     JLabel answerContent;
     Color green = new Color(188,226,158);
+    ChatGPT chatGPT;
     
-    Answer() {
+    Answer(ChatGPT chatGPT) {
+        this.chatGPT = chatGPT;
         this.setPreferredSize(new Dimension(400, 200));
         this.setBackground(green);
         this.setLayout(new BorderLayout());
@@ -60,8 +82,16 @@ class Answer extends JPanel{
         answerContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         this.add(answerContent, BorderLayout.CENTER);
     }
-    public void updateContent(String content) {
-        answerContent.setText(content);
+    public String updateContent(String content) {
+      try {
+        String answer = chatGPT.getAnswer(content);
+        answerContent.setText(answer);
+        return answer;
+      }  
+      catch (Exception exc){
+        exc.printStackTrace();
+        return "Exception";
+      }
     }
 }
 
@@ -151,8 +181,8 @@ class AppFrame extends JFrame {
     private TargetDataLine targetDataLine;
     private JLabel recordingLabel;
 
-    private Whisper whisper;
-    private ChatGPT chatgpt;
+  
+    
 
     AppFrame() {
         this.setSize(1000, 600);
@@ -162,8 +192,7 @@ class AppFrame extends JFrame {
         header = new Header();
         footer = new Footer();
         qanda = new QandA();
-        whisper = new Whisper();
-        chatgpt = new ChatGPT();
+        
         
         this.add(header, BorderLayout.NORTH);
         this.add(footer, BorderLayout.SOUTH);
@@ -195,44 +224,14 @@ class AppFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
               stopRecording();
               qanda.removeAll();
-              Question question = new Question();
-              
-              try {
-                String transcription = whisper.transcribe("recording.wav");
-                if (transcription != null) {
-                  SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                      question.updateContent(transcription);
-    
-                      // Refresh the QandA panel
-                      qanda.revalidate();
-                      qanda.repaint();
-                    }
-                  });
-                } else {
-                  SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                      question.updateContent("Error: Could not transcribe audio");
-                      
-                      // Refresh the QandA panel
-                      qanda.revalidate();
-                      qanda.repaint();
-                    }
-                  });
-                }
-              
+              Question question = new Question(new Whisper());
+              String transcription = question.updateContent();
               qanda.add(question);
-              
-              Answer answer = new Answer();
-              answer.updateContent(chatgpt.getAnswer(transcription));
+              Answer answer = new Answer(new ChatGPT());
+              // for testing purpose
+              String answerStr = answer.updateContent(transcription);
               qanda.add(answer);
               revalidate();
-              }
-              catch (Exception exc) {
-                exc.printStackTrace();
-              }
             }
           }
         );
@@ -303,170 +302,8 @@ class AppFrame extends JFrame {
 
 }
 
-//===========================================================================================================================================================================================
-
-
-// class Header extends JPanel {
-    
-//   Color backgroundColor = new Color(66, 66, 66);
-//   int cornerRadius = 15;
-
-//   Header() {
-//       this.setPreferredSize(new Dimension(400, 70));
-//       this.setBackground(backgroundColor);
-//       this.setOpaque(false);
-
-//       JLabel titleText = new JLabel("AudioGPT");
-//       titleText.setPreferredSize(new Dimension(200, 60));
-//       titleText.setFont(new Font("Arial", Font.BOLD, 30)); // Change font to Arial and increase the size to 30
-//       titleText.setForeground(Color.WHITE); // Set font color to white
-//       titleText.setHorizontalAlignment(JLabel.CENTER);
-//       this.add(titleText);
-//   }
-
-//   @Override
-//   protected void paintComponent(Graphics g) {
-//       super.paintComponent(g);
-
-//       Graphics2D g2d = (Graphics2D) g;
-//       g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-//       // Create a rounded rectangle shape with the desired corner radius
-//       RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, cornerRadius, cornerRadius);
-
-//       // Draw the drop shadow
-//       g2d.setColor(new Color(0, 0, 0, 64));
-//       g2d.translate(3, 3);
-//       g2d.fill(roundedRectangle);
-//       g2d.translate(-3, -3);
-
-//       // Draw the background color
-//       g2d.setColor(backgroundColor);
-//       g2d.fill(roundedRectangle);
-
-//       // Draw the border
-//       g2d.setColor(backgroundColor.darker());
-//       g2d.draw(roundedRectangle);
-//   }
-// }
-
-// class RecordButton extends JPanel {
-
-//   JButton askButton;
-
-//   Color backgroudColor = new Color(66, 66, 66);
-//   Border emptyBorder = BorderFactory.createEmptyBorder(0, 5, 0, 5);
-//   int cornerRadius = 15;
-
-//   RecordButton() {
-//       this.setPreferredSize(new Dimension(300, 45));
-//       this.setBackground(backgroudColor);
-
-//       GridLayout layout = new GridLayout(1,1);
-//       this.setLayout(layout);
-
-//       askButton = new JButton("Record a Question");
-//       askButton.setFont(new Font("Arial", Font.PLAIN, 15));
-//       askButton.setForeground(Color.WHITE);
-//       askButton.setBackground(backgroudColor);
-//       askButton.setBorder(emptyBorder);
-//       this.add(askButton);
-//   }
-
-//   public JButton getaskButton(){
-//       return askButton;
-//   }
-// }
-
-
-// class ChatContainer extends JPanel {
-//   int cornerRadius = 15;
-
-//   ChatContainer() {
-//       this.setOpaque(false);
-//   }
-
-//   @Override
-//   protected void paintComponent(Graphics g) {
-//       super.paintComponent(g);
-
-//       Graphics2D g2d = (Graphics2D) g;
-//       g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-//       // Draw a large white rectangle with a corner radius of 15
-//       int rectangleWidth = getWidth() - 500;
-//       int rectangleHeight = getHeight() - 250;
-//       int x = (getWidth() - rectangleWidth) / 2;
-//       int y = (getHeight() - rectangleHeight) / 2;
-//       g2d.setColor(Color.WHITE);
-//       g2d.fillRoundRect(x, y, rectangleWidth, rectangleHeight, cornerRadius, cornerRadius);
-//   }
-// }
-
-// class AppFrame extends JFrame {
-
-//   private Whisper whisper;
-//   private ChatGPT chatgpt;
-//   private ChatContainer chatContainer;
-//   private Header header;
-//   private AudioFormat audioFormat;
-
-//   private AudioFormat getAudioFormat() {
-//       float sampleRate = 44100;
-//       int sampleSizeInBits = 16;
-//       int channels = 2;
-//       boolean signed = true;
-//       boolean bigEndian = false;
-
-//       return new AudioFormat(
-//           sampleRate,
-//           sampleSizeInBits,
-//           channels,
-//           signed,
-//           bigEndian
-//       );
-//   }
-
-//   AppFrame() {
-//       this.setSize(1500, 800);
-//       this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//       this.setVisible(true);
-//       this.getContentPane().setBackground(new Color(66, 66, 66));
-
-//       header = new Header();
-//       chatContainer = new ChatContainer();
-
-//       whisper = new Whisper();
-//       chatgpt = new ChatGPT();
-
-//       JPanel centerPanel = new JPanel(new BorderLayout());
-//       centerPanel.setBackground(new Color(123, 123, 123));
-//       centerPanel.add(chatContainer, BorderLayout.CENTER);
-
-//       JPanel buttonPanel = new JPanel(new GridBagLayout());
-//       GridBagConstraints gridBagConstraints = new GridBagConstraints();
-
-//       gridBagConstraints.anchor = GridBagConstraints.CENTER;
-//       gridBagConstraints.insets = new Insets(0, 0, 30, 0);
-
-//       RecordButton recordButton = new RecordButton();
-//       buttonPanel.setBackground(new Color(123, 123, 123));
-//       buttonPanel.add(recordButton, gridBagConstraints);
-
-//       centerPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-//       this.add(header, BorderLayout.NORTH);
-//       this.add(centerPanel, BorderLayout.CENTER);
-
-//       audioFormat = getAudioFormat();
-//       revalidate();
-//   }
-// }
-
-
-
-public class AudioGPT {
-  public static void main(String[] args) {
-    new AppFrame();
-  }
-}
+ public class AudioGPT {
+    public static void main(String[] args) {
+        new AppFrame();
+    }
+ }
