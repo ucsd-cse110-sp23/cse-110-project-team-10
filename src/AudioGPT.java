@@ -16,8 +16,8 @@ class Question extends JPanel{
     Whisper whisper;
     
 
-    Question() {
-        whisper = new Whisper();
+    Question(Whisper whisper) {
+        this.whisper = whisper;
         this.setPreferredSize(new Dimension(400,200)); //set size of question
         this.setBackground(gray);
         this.setLayout(new BorderLayout());
@@ -67,8 +67,8 @@ class Answer extends JPanel{
     Color green = new Color(188,226,158);
     ChatGPT chatGPT;
     
-    Answer() {
-        chatGPT = new ChatGPT();
+    Answer(ChatGPT chatGPT) {
+        this.chatGPT = chatGPT;
         this.setPreferredSize(new Dimension(400, 200));
         this.setBackground(green);
         this.setLayout(new BorderLayout());
@@ -182,7 +182,7 @@ class AppFrame extends JFrame {
     private JLabel recordingLabel;
 
   
-    private ChatGPT chatgpt;
+    
 
     AppFrame() {
         this.setSize(1000, 600);
@@ -192,7 +192,7 @@ class AppFrame extends JFrame {
         header = new Header();
         footer = new Footer();
         qanda = new QandA();
-        chatgpt = new ChatGPT();
+        
         
         this.add(header, BorderLayout.NORTH);
         this.add(footer, BorderLayout.SOUTH);
@@ -224,10 +224,10 @@ class AppFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
               stopRecording();
               qanda.removeAll();
-              Question question = new Question();
+              Question question = new Question(new Whisper());
               String transcription = question.updateContent();
               qanda.add(question);
-              Answer answer = new Answer();
+              Answer answer = new Answer(new ChatGPT());
               // for testing purpose
               String answerStr = answer.updateContent(transcription);
               qanda.add(answer);
