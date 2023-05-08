@@ -13,11 +13,10 @@ class Question extends JPanel{
     JLabel indexQ;
     JLabel questionContent;
     Color gray = new Color(218, 229, 234);
-    Whisper whisper;
     
 
-    Question(Whisper whisper) {
-        this.whisper = whisper;
+    Question() {
+        
         this.setPreferredSize(new Dimension(400,200)); //set size of question
         this.setBackground(gray);
         this.setLayout(new BorderLayout());
@@ -32,32 +31,10 @@ class Question extends JPanel{
         this.add(questionContent, BorderLayout.CENTER);
 
     }
-    public String updateContent(){
-      String transcription;
-      try {
-          transcription = whisper.transcribe("recording.wav");
-        if (transcription != null) {
-          SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              questionContent.setText(transcription);
-            }
-          });
-        } else {
-          SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              questionContent.setText("Error: Could not transcribe audio");   
-            }
-          });
-        }
-        return transcription;
-      }
-      catch (Exception exc) {
-        exc.printStackTrace();
-        return "Error: Could not transcribe audio";
-      }
-      
+    public void updateContent(String content){
+        
+      questionContent.setText(content);
+
     }
     
 }
@@ -65,10 +42,8 @@ class Answer extends JPanel{
     JLabel indexA;
     JLabel answerContent;
     Color green = new Color(188,226,158);
-    ChatGPT chatGPT;
     
-    Answer(ChatGPT chatGPT) {
-        this.chatGPT = chatGPT;
+    Answer() {
         this.setPreferredSize(new Dimension(400, 200));
         this.setBackground(green);
         this.setLayout(new BorderLayout());
@@ -82,16 +57,8 @@ class Answer extends JPanel{
         answerContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         this.add(answerContent, BorderLayout.CENTER);
     }
-    public String updateContent(String content) {
-      try {
-        String answer = chatGPT.getAnswer(content);
-        answerContent.setText(answer);
-        return answer;
-      }  
-      catch (Exception exc){
-        exc.printStackTrace();
-        return "Exception";
-      }
+    public void updateContent(String content) {
+        answerContent.setText(content);
     }
 }
 
@@ -297,8 +264,8 @@ class AppFrame extends JFrame {
     private TargetDataLine targetDataLine;
     private JLabel recordingLabel;
 
-  
-    
+    private Whisper whisper;
+    private ChatGPT chatgpt;
 
     AppFrame() {
         this.setSize(1000, 600);
@@ -372,9 +339,9 @@ class AppFrame extends JFrame {
                 }
               
               qanda.add(question);
-              Answer answer = new Answer(new ChatGPT());
-              // for testing purpose
-              String answerStr = answer.updateContent(transcription);
+              
+              Answer answer = new Answer();
+              answer.updateContent(chatgpt.getAnswer(transcription));
               qanda.add(answer);
 
               OldQuestion oldQuestion = new OldQuestion(transcription, answer.answerContent.getText());
@@ -390,6 +357,10 @@ class AppFrame extends JFrame {
                 }
               );
               revalidate();
+              }
+              catch (Exception exc) {
+                exc.printStackTrace();
+              }
             }
           }
         );
