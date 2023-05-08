@@ -2,23 +2,13 @@ plugins {
     id 'java'
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-}
-
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
-    def junitVersion = '5.8.1'
-
-    // This provides the JUnit API.
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    // This provides the TestEngine to actually run the tests.
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
 test {
