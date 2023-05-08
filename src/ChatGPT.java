@@ -9,7 +9,7 @@ import java.io.*;
 
 public class ChatGPT {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
     private static final String MODEL = "text-davinci-003";
     ChatGPT(){
 
