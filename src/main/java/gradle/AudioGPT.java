@@ -64,11 +64,11 @@ class Question extends JPanel{
     }
 }
 
-class OldQuestion extends JButton {
+class OldQuestion extends JPanel {
   
       
-      JLabel questionLabel;
-      JLabel answerLabel;
+      JButton displayButton;
+      JButton deleteButton;
 
       MainScreen mainscreen;
       QuestionHistory questionhistory;
@@ -76,8 +76,8 @@ class OldQuestion extends JButton {
       Answer answer;
       Question question;
     
-      Color gray = new Color(218, 229, 234);
-      Color green = new Color(188, 226, 158);
+      Color black = new Color(0,0,0);
+      Color white = new Color(255,255,255);
     
       OldQuestion(Question Q, Answer A, MainScreen mainscreen, QuestionHistory questionhistory) {
         this.mainscreen = mainscreen;
@@ -86,21 +86,34 @@ class OldQuestion extends JButton {
         this.question = Q;
         this.answer = A;
         this.setPreferredSize(new Dimension(200, 20));
-        this.setBackground(gray);
-        this.setLayout(new BorderLayout());
+        this.setBackground(white);
+        this.setLayout(new GridLayout(1,2));
         
-    
-        questionLabel = new JLabel(Q.toString());
-        questionLabel.setBorder(BorderFactory.createEmptyBorder());
-        questionLabel.setBackground(gray);
-    
-        answerLabel = new JLabel(A.toString());
-        this.add(questionLabel, BorderLayout.CENTER);
+        
+        addDisplayButton();
+        addDeleteButton();
         addListeners();
   
       }
+      public void addDisplayButton(){
+        displayButton = new JButton(question.toString());
+        displayButton.setPreferredSize(new Dimension(180, 20));
+        displayButton.setBackground(white);
+        displayButton.setBorder(BorderFactory.createEmptyBorder());
+        this.add(displayButton);
+      }
+
+      public void addDeleteButton(){
+        deleteButton = new JButton("X");
+        deleteButton.setPreferredSize(new Dimension(20, 20));
+        deleteButton.setBackground(white);
+        deleteButton.setBorder(BorderFactory.createEmptyBorder());
+        deleteButton.setForeground(Color.RED);
+        this.add(deleteButton);
+      }
+
       public void addListeners() {
-        this.addActionListener(
+        displayButton.addActionListener(
           new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
