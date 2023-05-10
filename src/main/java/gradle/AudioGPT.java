@@ -16,7 +16,7 @@ import java.awt.event.*;
 
 class Question extends JPanel{
   JLabel indexQ;
-  JLabel questionContent;
+  JTextArea questionContent;
   Color gray = new Color(218, 229, 234);
   Whisper whisper;
   String questionStr;
@@ -32,9 +32,20 @@ class Question extends JPanel{
       indexQ.setHorizontalAlignment(JLabel.CENTER);
       this.add(indexQ,BorderLayout.WEST);
 
-      questionContent = new JLabel(questionStr);
-      questionContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-      this.add(questionContent, BorderLayout.CENTER);
+      questionContent = new JTextArea(questionStr);
+      questionContent.setEditable(false);
+      questionContent.setFont(new Font("San-serif", Font.BOLD, 15));
+      questionContent.setBackground(gray);
+
+      questionContent.setLineWrap(true);
+      questionContent.setWrapStyleWord(true);
+
+      JScrollPane scrollPane = new JScrollPane(questionContent);
+      scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+      scrollPane.setAlignmentY(Component.CENTER_ALIGNMENT);
+      
+      
+      this.add(scrollPane, BorderLayout.CENTER);
     }
     
     public void setString(String str){
@@ -47,7 +58,7 @@ class Question extends JPanel{
     }
 
     public void updateContent()throws Exception{
-      String transcription = whisper.transcribe("AudioGPT/recording.wav");
+      String transcription = whisper.transcribe("recording.wav");
       this.questionStr = transcription;
       questionContent.setText(transcription);        
     }
@@ -114,16 +125,9 @@ class OldQuestion extends JButton {
 
 
 
-
-
-
-
-
-
-
 class Answer extends JPanel{
   JLabel indexA;
-  JLabel answerContent;
+  JTextArea answerContent;
   Color green = new Color(188,226,158);
   ChatGPT chatgpt;
   String answerStr;     
@@ -139,9 +143,19 @@ class Answer extends JPanel{
     indexA.setHorizontalAlignment(JLabel.CENTER);
     this.add(indexA,BorderLayout.WEST);
 
-    answerContent = new JLabel(answerStr);
-    answerContent.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-    this.add(answerContent, BorderLayout.CENTER);
+    answerContent = new JTextArea(answerStr);
+    answerContent.setEditable(false);
+    answerContent.setFont(new Font("San-serif", Font.BOLD, 15));
+    answerContent.setBackground(green);
+
+    answerContent.setLineWrap(true);
+    answerContent.setWrapStyleWord(true);
+
+      JScrollPane scrollPane = new JScrollPane(answerContent);
+      scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+      scrollPane.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+    this.add(scrollPane, BorderLayout.CENTER);
   }
     
   public void setString(String str){
@@ -227,26 +241,28 @@ class QuestionHistory extends JPanel{
 
     this.setPreferredSize(new Dimension(200, 600));
     this.setBackground(backgroundColor);
+  
+    GridLayout layout = new GridLayout(8,1);
+    layout.setVgap(5);
+    this.setLayout(layout);
+    this.setPreferredSize(new Dimension(200, 600));
+    
+    
+    answerPanels = new HashMap<>();
+    
+  }
+  public void setTitle(){
     titleText = new JLabel("Prompt History");
     
     titleText.setPreferredSize(new Dimension(50, 60));
     titleText.setFont(new Font("San-serif", Font.BOLD, 12));
     titleText.setHorizontalAlignment(JLabel.CENTER);
     titleText.setVerticalAlignment(SwingConstants.TOP);
-  
-    GridLayout layout = new GridLayout(8,1);
-    layout.setVgap(5);
-    this.setLayout(layout);
-    this.setPreferredSize(new Dimension(200, 600));
     this.add(titleText);
-    
-    answerPanels = new HashMap<>();
-    
   }
-  
   public void saveToFile(Question question, Answer answer) throws IOException{
     
-    FileWriter writer = new FileWriter("AudioGPT/history.txt",true);
+    FileWriter writer = new FileWriter("history.txt",true);
     
       String questionstr = question.toString();
       String answerstr = answer.toString();
@@ -262,8 +278,8 @@ class QuestionHistory extends JPanel{
 
   public void loadFromFile() throws IOException {
     this.removeAll();  
-    
-    BufferedReader reader = new BufferedReader(new FileReader("AudioGPT/history.txt"));
+    this.setTitle();
+    BufferedReader reader = new BufferedReader(new FileReader("history.txt"));
       String line;
       while ((line = reader.readLine()) != null) {
         String[] parts = line.split("\\|");
@@ -474,7 +490,7 @@ class AppFrame extends JFrame {
           AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
     
           // the file that will contain the audio data
-          File audioFile = new File("AudioGPT/recording.wav");
+          File audioFile = new File("recording.wav");
           AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, audioFile);
           recordingLabel.setVisible(false);
           } 
