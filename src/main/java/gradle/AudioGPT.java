@@ -294,12 +294,17 @@ class MainScreen extends JPanel{
     return questionOnMain;
   }
   
+  public void clearAll(){
+    this.removeAll();
+    this.revalidate();
+    this.repaint();
+  }
+  
 
 }
 
 class QuestionHistory extends JPanel{
   Color backgroundColor = new Color(173, 216, 230);
-  JLabel titleText;
   MainScreen mainscreen;
   Map<Question,Answer> answerPanels;
   Whisper whisper;
@@ -323,15 +328,7 @@ class QuestionHistory extends JPanel{
     answerPanels = new HashMap<>();
     
   }
-  public void setTitle(){
-    titleText = new JLabel("Prompt History");
-    
-    titleText.setPreferredSize(new Dimension(50, 60));
-    titleText.setFont(new Font("San-serif", Font.BOLD, 12));
-    titleText.setHorizontalAlignment(JLabel.CENTER);
-    titleText.setVerticalAlignment(SwingConstants.TOP);
-    this.add(titleText);
-  }
+  
 
   public void saveToFile() throws IOException{
     File filename = new File("history.txt");
@@ -354,7 +351,7 @@ class QuestionHistory extends JPanel{
 
   public void loadFromFile() throws IOException {
     this.removeAll();  
-    this.setTitle();
+    
     BufferedReader reader = new BufferedReader(new FileReader("history.txt"));
       String line;
       while ((line = reader.readLine()) != null) {
@@ -387,15 +384,19 @@ class QuestionHistory extends JPanel{
       this.saveToFile();
     }
 
-    
-  
-    
+    public void clearAll() throws Exception{
+      this.removeAll();
+      this.saveToFile();
+      this.revalidate();
+      this.repaint();
+    }
   
 }
 
 class Footer extends JPanel{
   JButton askButton;
   JButton stopButton;
+  JButton clearAllButton;
   JLabel recordingLabel;
 
   Color backgroudColor = new Color(240,248,255);
@@ -408,6 +409,10 @@ class Footer extends JPanel{
     GridLayout layout = new GridLayout(1,4);
     layout.setHgap(5);
     this.setLayout(layout);
+    
+    clearAllButton = new JButton("Clear All Question");
+    clearAllButton.setFont(new Font("San-serif", Font.ITALIC, 10));
+    this.add(clearAllButton);
 
     askButton = new JButton("Ask a Question");
     askButton.setFont(new Font("San-serif", Font.ITALIC, 10));
@@ -428,7 +433,10 @@ class Footer extends JPanel{
   public JButton getaskButton(){
     return askButton;
   }
-    
+  
+  public JButton getClearButton(){
+    return clearAllButton;
+  }
   public JButton getstopButton() {
     return stopButton;
   }
@@ -439,12 +447,14 @@ class Footer extends JPanel{
 }
 
 class Header extends JPanel{
-    
+  
   Color backgroundColor  = new Color(240, 248,255);
 
   Header() {
+    
     this.setPreferredSize(new Dimension(400, 60));
     this.setBackground(backgroundColor);
+
     JLabel titleText = new JLabel("AudioGPT");
     titleText.setPreferredSize(new Dimension(200, 60));
     titleText.setFont(new Font("San-serif", Font.BOLD, 20));
@@ -464,6 +474,7 @@ class AppFrame extends JFrame {
 
   private JButton askButton;
   private JButton stopButton;
+  private JButton clearButton;
     
   private AudioFormat audioFormat;
   private TargetDataLine targetDataLine;
@@ -489,6 +500,7 @@ class AppFrame extends JFrame {
 
     askButton = footer.getaskButton();
     stopButton = footer.getstopButton();
+    clearButton = footer.getClearButton();
     recordingLabel = footer.getrecordingLabel();
         
     audioFormat = getAudioFormat();
@@ -500,6 +512,7 @@ class AppFrame extends JFrame {
   }
     
   public void addListeners() {
+
     askButton.addActionListener(
       new ActionListener() {
       @Override
@@ -525,7 +538,22 @@ class AppFrame extends JFrame {
         }
       }
       }
-      );    
+      );
+      
+      clearButton.addActionListener(
+      new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          try{
+            questionhistory.clearAll();
+            mainscreen.clearAll();
+          }
+          catch (Exception exc){
+            exc.printStackTrace();
+          }
+        }
+      }
+    );
   }
   
 
