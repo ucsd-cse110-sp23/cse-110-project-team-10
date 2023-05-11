@@ -4,6 +4,7 @@
 package gradle;
 
 import java.awt.*;
+// import java.awt.desktop.QuitEvent;
 import java.io.*;
 import java.util.*;
 
@@ -20,7 +21,10 @@ class Question extends JPanel{
   Color gray = new Color(218, 229, 234);
   Whisper whisper;
   String questionStr;
+  
     Question(Whisper whisper) {
+      
+
       this.whisper = whisper;
       questionStr = "";
       this.setPreferredSize(new Dimension(400,200)); //set size of question
@@ -78,11 +82,14 @@ class OldQuestion extends JPanel {
     
       Color black = new Color(0,0,0);
       Color white = new Color(255,255,255);
+     
     
       OldQuestion(Question Q, Answer A, MainScreen mainscreen, QuestionHistory questionhistory) {
+        
         this.mainscreen = mainscreen;
         this.questionhistory = questionhistory;
 
+      
         this.question = Q;
         this.answer = A;
         this.setPreferredSize(new Dimension(200, 20));
@@ -95,6 +102,26 @@ class OldQuestion extends JPanel {
         addListeners();
   
       }
+      public OldQuestion getOldQuestion(){
+        return this;
+      }
+      public String qToString() {
+        return question.toString();
+      }
+
+      public String aToString() {
+        return answer.toString();
+      }
+
+      public boolean checkIfOnMain(){
+        if ((this.question.toString()) == (mainscreen.getQuestionOnMain().toString())){
+            return true;
+        }
+        else {
+          return false;
+        }
+      }
+
       public void addDisplayButton(){
         displayButton = new JButton(question.toString());
         displayButton.setPreferredSize(new Dimension(180, 20));
@@ -124,16 +151,36 @@ class OldQuestion extends JPanel {
             catch (Exception exc){
               exc.printStackTrace();
             }
+  
             mainscreen.add(question);
             mainscreen.add(answer);
-            revalidate();
+            mainscreen.setQuestionOnMain(question);
           }
-          }   
-      );
+          }
+        );
+        deleteButton.addActionListener(
+          new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              
+                mainscreen.removeAll();
+                mainscreen.revalidate();
+                mainscreen.repaint();
+              
+              
+              try{
+                questionhistory.deleteQuestion((OldQuestion)deleteButton.getParent());
+                questionhistory.revalidate();
+                questionhistory.repaint();
+              }
+              catch (Exception exc){
+                exc.printStackTrace();
+              }
+            }
+          }
+        );
       }
       
-    
-    
 }
 
 
@@ -195,11 +242,14 @@ class Answer extends JPanel{
 class MainScreen extends JPanel{
   Color backgroundColor = new Color(240,248,255);
   
+  Question questionOnMain;
   
   Whisper whisper;
   ChatGPT chatgpt;
 
   MainScreen(Whisper whisper, ChatGPT chatgpt) throws Exception{
+    questionOnMain = new Question(whisper);
+
     GridLayout layout = new GridLayout(2,1);
     layout.setVgap(5);
 
@@ -222,17 +272,26 @@ class MainScreen extends JPanel{
     removeAll();
     add(newQuestion, 0); // add the latest question panel to the first row (index 0) of the GridLayout
     add(newAnswer);
-    
+    this.setQuestionOnMain(newQuestion);
     
     revalidate();
     repaint();
     return newAnswer;
   }
-  public void updateHistory(Question newQuestion, Answer newAnswer ,QuestionHistory questionhistory) throws Exception{
-    questionhistory.saveToFile(newQuestion,newAnswer);
-    questionhistory.loadFromFile();
+  public void updateHistory(Question question, Answer answer, QuestionHistory questionhistory) throws Exception{
+    OldQuestion oldquestion = new OldQuestion(question,answer,this, questionhistory);
+    questionhistory.add(oldquestion);
+    questionhistory.saveToFile();
     revalidate();
     repaint();
+  }
+
+  public void setQuestionOnMain(Question question){
+    questionOnMain = question;
+  }
+
+  public Question getQuestionOnMain(){
+    return questionOnMain;
   }
   
 
@@ -273,20 +332,24 @@ class QuestionHistory extends JPanel{
     titleText.setVerticalAlignment(SwingConstants.TOP);
     this.add(titleText);
   }
-  public void saveToFile(Question question, Answer answer) throws IOException{
+
+  public void saveToFile() throws IOException{
+    File filename = new File("history.txt");
+    FileWriter writer = new FileWriter(filename);
     
-    FileWriter writer = new FileWriter("history.txt",true);
-    
-      String questionstr = question.toString();
-      String answerstr = answer.toString();
-      questionstr = questionstr.replace("\n","");
-      answerstr = answerstr.replace("\n","");
-      String result = questionstr + "|" + answerstr +"\n";
-      
-      writer.append(result);
-    
-    
+    Component[] oldQuestionItem = this.getComponents();
+    for (int i = 0;i < oldQuestionItem.length; i++){
+      if(oldQuestionItem[i] instanceof OldQuestion){
+        String questionstr = ((OldQuestion)oldQuestionItem[i]).qToString();
+        String answerstr = ((OldQuestion)oldQuestionItem[i]).aToString();
+        questionstr = questionstr.replace("\n","");
+        answerstr = answerstr.replace("\n","");
+        String result = questionstr + "|" + answerstr +"\n";
+        writer.write(result);
+      }
+    }
     writer.close();
+    
   }
 
   public void loadFromFile() throws IOException {
@@ -307,15 +370,24 @@ class QuestionHistory extends JPanel{
           
 
           revalidate();
+          mainscreen.repaint();
         }
       }
       reader.close();
     }
     
+
     public void updateMap(Question question, Answer answer){
       answerPanels.put(question, answer);
 
     }
+
+    public void deleteQuestion(OldQuestion oldquestion) throws Exception{
+      this.remove(oldquestion);
+      this.saveToFile();
+    }
+
+    
   
     
   
