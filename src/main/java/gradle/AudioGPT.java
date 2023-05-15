@@ -1,4 +1,4 @@
-package main.java.gradle;
+package gradle;
 
 import java.awt.*;
 // import java.awt.desktop.QuitEvent;
