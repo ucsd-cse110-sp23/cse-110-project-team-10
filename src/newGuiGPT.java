@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.sound.sampled.*;
 import javax.swing.border.*;
 import java.io.FileWriter;
+import javax.imageio.ImageIO;
 
 //Header class that displays the title
 class Header extends JPanel {
@@ -189,8 +190,15 @@ class Footer extends JPanel {
         this.add(scrollPane, BorderLayout.CENTER);
 
         // button to clear history
-        JButton clearHistoryButton = new JButton("Clear");
+        JButton clearHistoryButton = new JButton();
+        try {
+            Image img = ImageIO.read(getClass().getResource("clear.png"));
+            clearHistoryButton.setIcon(new ImageIcon(img));
+          } catch (Exception ex) {
+            System.out.println(ex);
+          }
         clearHistoryButton.setPreferredSize(new Dimension(90, 30));
+        clearHistoryButton.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         clearHistoryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
