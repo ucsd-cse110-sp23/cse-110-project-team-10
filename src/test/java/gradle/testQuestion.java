@@ -4,58 +4,100 @@
 package gradle;
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
 
-class MockWhisper extends Whisper{
-    int Audio;
-    MockWhisper(){
-        this.Audio = 2;    
+import java.util.UUID;
+
+class MockWhisper extends Whisper {
+    private String transcription;
+    MockWhisper(String transcription) {
+        this.transcription = transcription;
     }
     @Override
-    public String transcribe(String a){
-        
-        if (Audio == 1){
-            return "What is the capital of France?";
-        }
-        else if (Audio == 2){
-            return "What is the capital of China?";
-        }
-        else {
-            return "Error: Could not transcribe audio.";
-        }
+    public String transcribe(String audio) {
+        return transcription;
     }
 }
 
+public class testQuestion {
+    private Question question;
+    private UUID id;
+    private MockWhisper mockWhisper;
 
+    @BeforeEach
+    void setup() {
+        id = UUID.randomUUID();
+    }
 
-
-
-class testQuestion {
-    //test Question class and methods
-    @Test 
-    void testSetString() {
-        MockWhisper mockwhisper = new MockWhisper();
-        Question question = new Question(mockwhisper);
-        question.setString("What is the capital of China?");
-        
-        assertEquals("What is the capital of China?",question.questionStr);
-        assertEquals("What is the capital of China?",question.questionContent.getText());
+    @Test
+    void testGetId() {
+        question = new Question(new MockWhisper(""), id);
+        UUID actualId = question.getId();
+        assertEquals(id, actualId, "Returned ID does not match the expected ID");
     }
     @Test
-    void testToString(){
-        MockWhisper mockwhisper = new MockWhisper();
-        Question question = new Question(mockwhisper);
-        question.setString("What is the capital of China?");
+    void testDefaultInitialization() {
+        question = new Question(new MockWhisper(""), id);
 
-        assertEquals("What is the capital of China?",question.toString());
+        String actualStr = question.toString();
+        assertEquals("", actualStr, "Question string should be empty by default");
+
+        String actualContent = question.questionContent.getText();
+        assertEquals("", actualContent, "Question content should be empty by default");
     }
+    
     @Test
-    void testUpdateContent() throws Exception{
-        MockWhisper mockwhisper = new MockWhisper();
-        Question question = new Question(mockwhisper);
+    void testSetStringWithEmptyString() {
+        String emptyStr = "";
+        question = new Question(new MockWhisper(""), id);
+        question.setString(emptyStr);
+
+        String actualStr = question.toString();
+        assertEquals(emptyStr, actualStr, "Question string does not match the expected empty string");
+
+        String actualContent = question.questionContent.getText();
+        assertEquals(emptyStr, actualContent, "Question content does not match the expected empty string");
+    }
+
+    @Test
+    void testSetStringWithNullValue() {
+        question = new Question(new MockWhisper(""), id);
+        question.setString(null);
+
+        String actualStr = question.toString();
+        assertEquals("", actualStr, "Question string should be empty when set with a null value");
+
+        String actualContent = question.questionContent.getText();
+        assertEquals("", actualContent, "Question content should be empty when set with a null value");
+    }
+    
+    @Test
+    void testSetStringUpdatesQuestionFields() {
+        String testStr = "Test question";
+        question = new Question(new MockWhisper(""), id);
+        question.setString(testStr);
+
+        String actualStr = question.toString();
+        assertEquals(testStr, actualStr, "Question string does not match the expected value");
+
+        String actualContent = question.questionContent.getText();
+        assertEquals(testStr, actualContent, "Question content does not match the expected value");
+    }
+
+    
+    @Test
+    void testUpdateContentUpdatesQuestionFields() throws Exception {
+        String expectedTranscription = "What is the capital of China?";
+        mockWhisper = new MockWhisper(expectedTranscription);
+        question = new Question(mockWhisper, id);
         question.updateContent();
-        assertEquals("What is the capital of China?",question.questionContent.getText());
 
+        String actualStr = question.toString();
+        assertEquals(expectedTranscription, actualStr, "Question string does not match the expected transcription");
+
+        String actualContent = question.questionContent.getText();
+        assertEquals(expectedTranscription, actualContent, "Question content does not match the expected transcription");
     }
 }
+
