@@ -1,7 +1,7 @@
 # AudioGPT
 
 ## Introduction
-AudioGPT is a voice-interactive front-end application for OpenAI's ChatGPT. This application empowers users to interact with ChatGPT using their voice, making the AI model more accessible and convenient to use. 
+AudioGPT is a voice-interactive front-end application for OpenAI's ChatGPT and Whisper API. This application empowers users to interact with ChatGPT using their voice through Whisper, making the AI model more accessible and convenient to use. 
 
 ## Features
 - **Voice Input**: Utilize your microphone to ask questions or provide input to the ChatGPT model.
