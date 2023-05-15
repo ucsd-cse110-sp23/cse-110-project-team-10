@@ -526,6 +526,15 @@ public class newGuiGPT {
 }
 
 
+
+//run build script to launch
+
+// cd /src
+// ./buildAndRun.sh
+
+
+//Alternative method
+
 //compile info 
 //javac -cp ../lib/json-20230227.jar Whisper.java ChatGPT.java newGuiGPT.java
 
