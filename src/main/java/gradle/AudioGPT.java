@@ -1,4 +1,4 @@
-package gradle;
+package main.java.gradle;
 
 import java.awt.*;
 // import java.awt.desktop.QuitEvent;
@@ -170,12 +170,14 @@ class MainScreen extends JPanel {
 		return newAnswer;
 	}
 
-	public void updateHistory(Question question, Answer answer, QuestionHistory questionhistory) throws Exception {
+	public OldQuestion updateHistory(Question question, Answer answer, QuestionHistory questionhistory) throws Exception {
 		OldQuestion oldquestion = new OldQuestion(question, answer, this, questionhistory);
+		questionhistory.updateMap(question, answer);
 		questionhistory.add(oldquestion);
 		questionhistory.saveToFile();
 		revalidate();
 		repaint();
+		return oldquestion;
 	}
 
 	public void setQuestionOnMain(Question question) {
@@ -326,7 +328,7 @@ class OldQuestion extends JPanel {
 	}
 
 	public boolean checkIfOnMain() {
-		if ((this.question.toString()) == (mainscreen.getQuestionOnMain().toString())) {
+		if ((this.question.getId()).equals(mainscreen.getQuestionOnMain().getId())) {
 			return true;
 		} else {
 			return false;
