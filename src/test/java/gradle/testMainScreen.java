@@ -1,57 +1,55 @@
 package gradle;
 
-
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class MockWhisper1 extends Whisper{
-    int Audio;
-    MockWhisper1(){
-        this.Audio = 2;    
-    }
-    @Override
-    public String transcribe(String a){
-        
-        if (Audio == 1){
-            return "What is the capital of France?";
-        }
-        else if (Audio == 2){
-            return "What is the capital of China?";
-        }
-        else {
-            return "Error: Could not transcribe audio.";
-        }
-    }
-}
-
-class MockChatGPT1 extends ChatGPT{
-    String Question;
-    MockChatGPT1(String question){
-        this.Question = question;
-    }
-    public String getAnswer(String q){
-        if (Question == "What is the capital of France?"){
-            return "Paris";
-        }
-        else if (Question == "What is the capital of China?"){
-            return "Beijing";
-        }
-        else {
-            return "";
-        }
-    }
-}
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import org.junit.Before;
+import org.junit.Test;
+import java.util.UUID;
 
 public class testMainScreen {
-    @Test
-    void testAskQuestion() throws Exception{
-        MockChatGPT1 mockchatgpt1 = new MockChatGPT1("What is the capital of China?");
-        MockWhisper1 mockwhisper1 = new MockWhisper1();
-        MainScreen mainscreen = new MainScreen(mockwhisper1, mockchatgpt1);
+	private MainScreen mainScreen;
+	private MockChatGPT mockChatGPT;
+	private MockWhisper mockWhisper;
 
-        Question question = new Question(mockwhisper1);
-        Answer answer = mainscreen.AskQuestion(question);
-        assertEquals("Beijing",answer.answerContent.getText());
+	@Before
+	public void setup() throws Exception {
+		mockChatGPT = new MockChatGPT();
+		mockWhisper = new MockWhisper("What is the capital of China?");
+		mainScreen = new MainScreen(mockWhisper, mockChatGPT);
+	}
+
+	@Test
+	public void testAskQuestion() throws Exception {
+		String questionContent = "What is the capital of China?";
+		String expectedAnswer = "Beijing";
+		mockChatGPT.setExpectedAnswer(questionContent, expectedAnswer);
+
+		Question question = new Question(mockWhisper, UUID.randomUUID());
+		question.updateContent();
+
+		Answer answer = mainScreen.AskQuestion(question);
+
+		assertEquals(expectedAnswer, answer.toString());
+		assertEquals(question, mainScreen.getQuestionOnMain());
+	}
+	@Test
+    public void testSetAndGetQuestionOnMain() throws Exception {
+        Question question = new Question(mockWhisper, UUID.randomUUID());
+        question.setString("What is the capital of France?");
+        mainScreen.setQuestionOnMain(question);
+        assertEquals(question, mainScreen.getQuestionOnMain());
+    }
+
+    @Test
+    public void testClearAll() throws Exception {
+        Question question = new Question(mockWhisper, UUID.randomUUID());
+        question.updateContent();
+
+        mainScreen.AskQuestion(question);
+        mainScreen.clearAll();
+
+        assertEquals(0, mainScreen.getComponentCount());
+        assertNull(mainScreen.getQuestionOnMain());
     }
 }
