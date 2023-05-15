@@ -1,10 +1,9 @@
 package gradle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.util.UUID;
 
 public class testMainScreen {
@@ -12,7 +11,7 @@ public class testMainScreen {
 	private MockChatGPT mockChatGPT;
 	private MockWhisper mockWhisper;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		mockChatGPT = new MockChatGPT();
 		mockWhisper = new MockWhisper("What is the capital of China?");
