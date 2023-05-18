@@ -1,3 +1,6 @@
+# Build Scripts
+To run the server please go into your directory and type ./run-and-build.sh
+
 # Audio GPT
 Audio Gpt is a front end replacement for ChatGPT that allows for commands to be delegated using the user's voice
 
