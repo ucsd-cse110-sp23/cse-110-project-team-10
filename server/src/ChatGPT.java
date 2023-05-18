@@ -1,4 +1,4 @@
-package gradle;
+package server.src;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,9 +13,10 @@ public class ChatGPT {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/completions";
     private static final String API_KEY = "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";
     private static final String MODEL = "text-davinci-003";
-    ChatGPT(){
 
+    ChatGPT(){
     }
+    
     public String getAnswer(String question)throws IOException, InterruptedException{
         String prompt = question;
  
@@ -55,5 +56,4 @@ public class ChatGPT {
 
         return generatedText;
     }
-    
 }
