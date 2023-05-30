@@ -368,6 +368,7 @@ class Footer extends JPanel {
 	JButton stopButton;
 	// JButton deleteButton;
 	// JButton clearAllButton;
+
 	JLabel recordingLabel;
 
 	Color backgroudColor = new Color(240, 248, 255);
@@ -481,6 +482,7 @@ class AppFrame extends JFrame {
 
 		askButton = footer.getaskButton();
 		stopButton = footer.getstopButton();
+
 		// deleteButton = footer.getDeleteButton();
 		// clearButton = footer.getClearButton();
 		recordingLabel = footer.getrecordingLabel();
@@ -509,11 +511,12 @@ class AppFrame extends JFrame {
 				try {
 					UUID questionId = UUID.randomUUID();
 					Question newQuestion = new Question(whisper, questionId);
-					processVoiceCommand(whisper.transcribe("recording.wav"));
-					if (!whisper.transcribe("recording.wav").equalsIgnoreCase("Delete prompt.") 
-					&& !whisper.transcribe("recording.wav").equalsIgnoreCase("Delete prompt")
-					&& !whisper.transcribe("recording.wav").equalsIgnoreCase("Clear All.")
-					&& !whisper.transcribe("recording.wav").equalsIgnoreCase("Clear All")) {
+					String command = whisper.transcribe("recording.wav");
+					processVoiceCommand(command);
+					if (!command.equalsIgnoreCase("Delete prompt.") 
+					&& !command.equalsIgnoreCase("Delete prompt")
+					&& !command.equalsIgnoreCase("Clear All.")
+					&& !command.equalsIgnoreCase("Clear All")) {
 						Answer newAnswer = mainscreen.AskQuestion(newQuestion);
 						mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
 					}
@@ -523,6 +526,7 @@ class AppFrame extends JFrame {
 				}
 			}
 		});
+
 
 	// 	deleteButton.addActionListener(new ActionListener() {
 	// 		@Override
@@ -651,8 +655,103 @@ class AppFrame extends JFrame {
 
 }
 
+class CreateAccountUI extends JFrame {
+		
+	private JTextField emailField;
+	private JPasswordField passwordField;
+	private JPasswordField verifyPasswordField;
+
+	// private JButton createButton;
+
+	public CreateAccountUI() {
+
+		setTitle("Create Account");
+        setSize(400, 200);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        // Create labels for the text fields
+        JLabel emailLabel = new JLabel("Email:");
+        JLabel passwordLabel = new JLabel("Password:");
+        JLabel verifyPasswordLabel = new JLabel("Verify Password:");
+
+        // Create text fields
+        emailField = new JTextField(20);
+        passwordField = new JPasswordField(20);
+        verifyPasswordField = new JPasswordField(20);
+
+        // Create the create account button
+        JButton createAccountButton = new JButton("Create Account");
+
+        // Add action listener to the create account button
+        createAccountButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Get the values from the text fields
+                String email = emailField.getText();
+                String password = new String(passwordField.getPassword());
+                String verifyPassword = new String(verifyPasswordField.getPassword());
+
+                // Perform validation checks
+                if (email.isEmpty() || password.isEmpty() || verifyPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!password.equals(verifyPassword)) {
+                    JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    new Create(email, password);
+					try {
+						new AppFrame();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+                    //JOptionPane.showMessageDialog(null, "Account created successfully!");
+					dispose();
+                }
+            }
+        });
+
+        // Set the layout of the frame
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Add components to the frame
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(emailLabel, gbc);
+
+        gbc.gridx = 1;
+        add(emailField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        add(passwordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        add(verifyPasswordLabel, gbc);
+
+        gbc.gridx = 1;
+        add(verifyPasswordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        add(createAccountButton, gbc);
+
+        // Display the frame
+        setVisible(true);
+
+	}
+}
+
 public class AudioGPT {
 	public static void main(String[] args) throws Exception {
-		new AppFrame();
+		//new AppFrame();
+		new CreateAccountUI();
 	}
 }

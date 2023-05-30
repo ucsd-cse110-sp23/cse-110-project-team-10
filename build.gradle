@@ -35,3 +35,7 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+dependencies {
+  implementation 'org.mongodb:mongodb-driver-sync:4.9.1'
+}
