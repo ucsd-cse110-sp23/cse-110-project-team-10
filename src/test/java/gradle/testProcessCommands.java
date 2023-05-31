@@ -10,7 +10,33 @@ import java.util.UUID;
 
 
 public class testProcessCommands {
+	
+	class MockMainScreen {
+	    boolean removeAllCalled = false;
+	    boolean revalidateCalled = false;
+	    boolean repaintCalled = false;
 
+	    public void removeAll() {
+	        removeAllCalled = true;
+	    }
+
+	    public void revalidate() {
+	        revalidateCalled = true;
+	    }
+
+	    public void repaint() {
+	        repaintCalled = true;
+	    }
+	}
+
+	class MockQuestionHistory {
+	    boolean clearAllCalled = false;
+
+	    public void clearAll() {
+	        clearAllCalled = true;
+	    }
+	}
+	
     @Test
     public void testProcessVoiceCommand() {
         // Setup the mocks
@@ -30,29 +56,3 @@ public class testProcessCommands {
         assertTrue(mockQuestionHistory.clearAllCalled);
     }
 }
-class MockMainScreen {
-    boolean removeAllCalled = false;
-    boolean revalidateCalled = false;
-    boolean repaintCalled = false;
-
-    public void removeAll() {
-        removeAllCalled = true;
-    }
-
-    public void revalidate() {
-        revalidateCalled = true;
-    }
-
-    public void repaint() {
-        repaintCalled = true;
-    }
-}
-
-class MockQuestionHistory {
-    boolean clearAllCalled = false;
-
-    public void clearAll() {
-        clearAllCalled = true;
-    }
-}
-
