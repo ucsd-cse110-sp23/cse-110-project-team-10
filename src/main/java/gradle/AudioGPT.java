@@ -362,27 +362,6 @@ class OldQuestion extends JPanel {
 	}
 }
 
-class AppMediator {
-    MockMainScreen mainScreen;
-    MockQuestionHistory questionHistory;
-
-    public AppMediator(MockMainScreen mainScreen, MockQuestionHistory questionHistory) {
-        this.mainScreen = mainScreen;
-        this.questionHistory = questionHistory;
-    }
-
-    public void processVoiceCommand(String command) {
-        // Process the command
-        // Assume "delete" means we are clearing the screen and the history
-        if ("Delete prompt".equalsIgnoreCase(command)) {
-            mainScreen.removeAll();
-            questionHistory.clearAll();
-            mainScreen.revalidate();
-            mainScreen.repaint();
-        }
-    }
-}
-
 class Footer extends JPanel {
 	JButton askButton;
 	JButton stopButton;
