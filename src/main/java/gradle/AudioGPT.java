@@ -657,12 +657,11 @@ class AppFrame extends JFrame {
 
 class CreateAccountUI extends JFrame {
 		
-	public JTextField emailField;
-	public JPasswordField passwordField;
-	public JPasswordField verifyPasswordField;
+	private JTextField emailField;
+	private JPasswordField passwordField;
+	private JPasswordField verifyPasswordField;
 
-	public JButton createAccountButton;
-
+	// private JButton createButton;
 
 	public CreateAccountUI() {
 
@@ -682,7 +681,7 @@ class CreateAccountUI extends JFrame {
         verifyPasswordField = new JPasswordField(20);
 
         // Create the create account button
-        createAccountButton = new JButton("Create Account");
+        JButton createAccountButton = new JButton("Create Account");
 
         // Add action listener to the create account button
         createAccountButton.addActionListener(new ActionListener() {
