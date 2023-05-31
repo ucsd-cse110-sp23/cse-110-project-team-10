@@ -362,6 +362,26 @@ class OldQuestion extends JPanel {
 	}
 }
 
+class AppMediator {
+    MockMainScreen mainScreen;
+    MockQuestionHistory questionHistory;
+
+    public AppMediator(MockMainScreen mainScreen, MockQuestionHistory questionHistory) {
+        this.mainScreen = mainScreen;
+        this.questionHistory = questionHistory;
+    }
+
+    public void processVoiceCommand(String command) {
+        // Process the command
+        // Assume "delete" means we are clearing the screen and the history
+        if ("Delete prompt".equalsIgnoreCase(command)) {
+            mainScreen.removeAll();
+            questionHistory.clearAll();
+            mainScreen.revalidate();
+            mainScreen.repaint();
+        }
+    }
+}
 
 class Footer extends JPanel {
 	JButton askButton;
@@ -527,44 +547,6 @@ class AppFrame extends JFrame {
 			}
 		});
 
-
-	// 	deleteButton.addActionListener(new ActionListener() {
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-
-	// 			mainscreen.removeAll();
-	// 			mainscreen.revalidate();
-	// 			mainscreen.repaint();
-
-	// 			try {
-	// 				OldQuestion toDelete = null;
-	// 				for (Component i : questionhistory.getComponents()) {
-	// 					System.out.println(((OldQuestion) i).question.getId());
-	// 					System.out.println(mainscreen.getQuestionOnMain().getId());
-	// 					if (i instanceof OldQuestion
-	// 							&& ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
-	// 						toDelete = (OldQuestion) i;
-	// 						break;
-	// 					}
-	// 				}
-	// 				questionhistory.deleteQuestion(toDelete);
-	// 			} catch (Exception exc) {
-	// 				exc.printStackTrace();
-	// 			}
-	// 		}
-	// 	});
-
-	// 	clearButton.addActionListener(new ActionListener() {
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-	// 			try {
-	// 				questionhistory.clearAll();
-	// 				mainscreen.clearAll();
-	// 			} catch (Exception exc) {
-	// 				exc.printStackTrace();
-	// 			}
-	// 		}
-	// 	});
 	}
 
 	private AudioFormat getAudioFormat() {
@@ -620,7 +602,7 @@ class AppFrame extends JFrame {
 		targetDataLine.close();
 	}
 
-	private void processVoiceCommand(String command) {
+	void processVoiceCommand(String command) {
 		if (command.equalsIgnoreCase("Delete prompt.") || command.equalsIgnoreCase("Delete prompt")) {
 			mainscreen.removeAll();
 			mainscreen.revalidate();
