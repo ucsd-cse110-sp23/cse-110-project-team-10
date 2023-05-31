@@ -1,6 +1,10 @@
-package gradle;
+package main.java.gradle;
 
 import org.junit.jupiter.api.Test;
+
+import main.java.gradle.testProcessCommands.MockMainScreen;
+import main.java.gradle.testProcessCommands.MockQuestionHistory;
+
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -34,6 +38,27 @@ public class testProcessCommands {
 
 	    public void clearAll() {
 	        clearAllCalled = true;
+	    }
+	}
+	
+	class AppMediator {
+	    MockMainScreen mainScreen;
+	    MockQuestionHistory questionHistory;
+
+	    public AppMediator(MockMainScreen mainScreen, MockQuestionHistory questionHistory) {
+	        this.mainScreen = mainScreen;
+	        this.questionHistory = questionHistory;
+	    }
+
+	    public void processVoiceCommand(String command) {
+	        // Process the command
+	        // Assume "delete" means we are clearing the screen and the history
+	        if ("Delete prompt".equalsIgnoreCase(command)) {
+	            mainScreen.removeAll();
+	            questionHistory.clearAll();
+	            mainScreen.revalidate();
+	            mainScreen.repaint();
+	        }
 	    }
 	}
 	
