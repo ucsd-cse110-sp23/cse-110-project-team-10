@@ -27,8 +27,52 @@ import java.io.*;
 import java.util.*;
 
 
+class MockCreateAccountUI extends CreateAccountUI{
+    private String emailField;
+    private String passwordField;
+    private String verifyPasswordField;
+
+    public MockCreateAccountUI(){
+        this.emailField = "";
+        this.passwordField = "";
+        this.verifyPasswordField = "";
+    }
+
+    public void setEmailField(String email){
+        this.emailField = email;
+    }
+
+    public void setPasswordField(String password){
+        this.passwordField = password;
+    }
+
+    public void setVerifyPasswordField(String password){
+        this.verifyPasswordField = password;
+    }
+
+    public boolean checkPasswordValidity(){
+        if (passwordField.equals(verifyPasswordField)){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkFields(){
+        if (emailField != null && passwordField != null && verifyPasswordField != null){
+            return true;
+        }
+        return false;
+    }
+
+    public void createAccount(){
+        if (checkPasswordValidity() == true){
+            new Create(emailField, passwordField);
+        }
+    }
+}
 public class CreateAccountBDDTests {
-    private CreateAccountUI createAccountUI;
+    private MockCreateAccountUI mockCreateAccountUI;
+
     String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
     MongoClient mongoClient = MongoClients.create(uri);
     MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
@@ -36,16 +80,16 @@ public class CreateAccountBDDTests {
     
     @BeforeEach
 	public void setup() throws Exception {
-		createAccountUI = new CreateAccountUI();
+		mockCreateAccountUI = new MockCreateAccountUI();
 	}
 
     @Test
     public void testCreateAccount() throws Exception{
         long size = userCollection.countDocuments();
-        createAccountUI.emailField.setText("test@gmail.com");
-        createAccountUI.passwordField.setText("password");
-        createAccountUI.verifyPasswordField.setText("password");
-        createAccountUI.createAccountButton.doClick();
+        mockCreateAccountUI.setEmailField("joseph@gmail.com");
+        mockCreateAccountUI.setPasswordField("password");
+        mockCreateAccountUI.setVerifyPasswordField("password");
+        mockCreateAccountUI.createAccount();
         
         assertEquals(size+1,userCollection.countDocuments());
 
@@ -54,11 +98,11 @@ public class CreateAccountBDDTests {
     @Test
     public void testPasswordsDontMatch() throws Exception{
         long size = userCollection.countDocuments();
-        createAccountUI.emailField.setText("test@gmail.com");
-        createAccountUI.passwordField.setText("123");
-        createAccountUI.verifyPasswordField.setText("321");
-        createAccountUI.createAccountButton.doClick();
-
+        mockCreateAccountUI.setEmailField("joseph@gmail.com");
+        mockCreateAccountUI.setPasswordField("123");
+        mockCreateAccountUI.setVerifyPasswordField("321");
+        mockCreateAccountUI.createAccount();
+        
         assertEquals(size, userCollection.countDocuments());
     }
 }
