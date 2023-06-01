@@ -14,6 +14,10 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.ConnectionString;
+import com.mongodb.ServerAddress;
+import com.mongodb.MongoCredential;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -72,12 +76,17 @@ class MockCreateAccountUI{
 public class CreateAccountBDDTests {
     private MockCreateAccountUI mockCreateAccountUI;
 
-    //String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
-    String uri = "mongodb://host1:27017,host2:27017,host3:27017/";
+    
+    String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
     MongoClient mongoClient = MongoClients.create(uri);
     MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
     MongoCollection<Document> userCollection = sampleTrainingDB.getCollection("Email");
     
+    
+    //MongoClient mongoClient = MongoClients.create("mongodb://host1:27017,host2:27017,host3:27017");
+    //MongoClient mongo = MongoClients.create("mongodb://host1:27017");
+    //MongoDatabase db = mongoClient.getDatabase("Project");
+    //MongoCollection<Document> userCollection = db.getCollection("Email");
     @BeforeEach
 	public void setup() throws Exception {
 		mockCreateAccountUI = new MockCreateAccountUI();
