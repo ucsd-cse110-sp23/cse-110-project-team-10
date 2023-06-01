@@ -72,7 +72,8 @@ class MockCreateAccountUI{
 public class CreateAccountBDDTests {
     private MockCreateAccountUI mockCreateAccountUI;
 
-    String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
+    //String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
+    String uri = "mongodb://host1:27017,host2:27017,host3:27017/";
     MongoClient mongoClient = MongoClients.create(uri);
     MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
     MongoCollection<Document> userCollection = sampleTrainingDB.getCollection("Email");
