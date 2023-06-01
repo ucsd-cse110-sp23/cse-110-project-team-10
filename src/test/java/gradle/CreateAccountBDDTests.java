@@ -26,7 +26,6 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-
 class MockCreateAccountUI extends CreateAccountUI{
     private String emailField;
     private String passwordField;
@@ -102,7 +101,7 @@ public class CreateAccountBDDTests {
         mockCreateAccountUI.setPasswordField("123");
         mockCreateAccountUI.setVerifyPasswordField("321");
         mockCreateAccountUI.createAccount();
-        
+
         assertEquals(size, userCollection.countDocuments());
     }
 }
