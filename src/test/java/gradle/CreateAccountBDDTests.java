@@ -26,7 +26,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-class MockCreateAccountUI extends CreateAccountUI{
+class MockCreateAccountUI{
     private String emailField;
     private String passwordField;
     private String verifyPasswordField;

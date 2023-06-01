@@ -753,6 +753,6 @@ class CreateAccountUI extends JFrame {
 public class AudioGPT {
 	public static void main(String[] args) throws Exception {
 		//new AppFrame();
-		//new CreateAccountUI();
+		new CreateAccountUI();
 	}
 }
