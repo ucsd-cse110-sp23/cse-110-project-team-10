@@ -362,7 +362,6 @@ class OldQuestion extends JPanel {
 	}
 }
 
-
 class Footer extends JPanel {
 	JButton askButton;
 	JButton stopButton;
@@ -527,44 +526,6 @@ class AppFrame extends JFrame {
 			}
 		});
 
-
-	// 	deleteButton.addActionListener(new ActionListener() {
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-
-	// 			mainscreen.removeAll();
-	// 			mainscreen.revalidate();
-	// 			mainscreen.repaint();
-
-	// 			try {
-	// 				OldQuestion toDelete = null;
-	// 				for (Component i : questionhistory.getComponents()) {
-	// 					System.out.println(((OldQuestion) i).question.getId());
-	// 					System.out.println(mainscreen.getQuestionOnMain().getId());
-	// 					if (i instanceof OldQuestion
-	// 							&& ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
-	// 						toDelete = (OldQuestion) i;
-	// 						break;
-	// 					}
-	// 				}
-	// 				questionhistory.deleteQuestion(toDelete);
-	// 			} catch (Exception exc) {
-	// 				exc.printStackTrace();
-	// 			}
-	// 		}
-	// 	});
-
-	// 	clearButton.addActionListener(new ActionListener() {
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-	// 			try {
-	// 				questionhistory.clearAll();
-	// 				mainscreen.clearAll();
-	// 			} catch (Exception exc) {
-	// 				exc.printStackTrace();
-	// 			}
-	// 		}
-	// 	});
 	}
 
 	private AudioFormat getAudioFormat() {
@@ -620,7 +581,7 @@ class AppFrame extends JFrame {
 		targetDataLine.close();
 	}
 
-	private void processVoiceCommand(String command) {
+	void processVoiceCommand(String command) {
 		if (command.equalsIgnoreCase("Delete prompt.") || command.equalsIgnoreCase("Delete prompt")) {
 			mainscreen.removeAll();
 			mainscreen.revalidate();
@@ -657,12 +618,11 @@ class AppFrame extends JFrame {
 
 class CreateAccountUI extends JFrame {
 		
-	public JTextField emailField;
-	public JPasswordField passwordField;
-	public JPasswordField verifyPasswordField;
+	private JTextField emailField;
+	private JPasswordField passwordField;
+	private JPasswordField verifyPasswordField;
 
-	public JButton createAccountButton;
-
+	// private JButton createButton;
 
 	public CreateAccountUI() {
 
@@ -682,7 +642,7 @@ class CreateAccountUI extends JFrame {
         verifyPasswordField = new JPasswordField(20);
 
         // Create the create account button
-        createAccountButton = new JButton("Create Account");
+        JButton createAccountButton = new JButton("Create Account");
 
         // Add action listener to the create account button
         createAccountButton.addActionListener(new ActionListener() {
