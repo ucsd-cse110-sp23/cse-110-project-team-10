@@ -31,7 +31,21 @@ jobs:
       # build everything (includes running unit tests)
       - name: Execute Gradle build
         run: ./gradlew build
+        
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+            mongodb-version: ${{ matrix.mongodb-version }}
+            mongodb-replica-set: test-rs
+            mongodb-port: 42069
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+        env:
+          CI: true
       # report the results
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
