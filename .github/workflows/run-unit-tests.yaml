@@ -31,7 +31,6 @@ jobs:
       # build everything (includes running unit tests)
       - name: Execute Gradle build
         run: ./gradlew build
-        
       # report the results
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
