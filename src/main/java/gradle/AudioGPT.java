@@ -4,6 +4,7 @@ import java.awt.*;
 // import java.awt.desktop.QuitEvent;
 import java.io.*;
 import java.util.*;
+import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -236,6 +237,7 @@ class QuestionHistory extends JPanel {
 				String result = id.toString() + "|" + questionstr + "|" + answerstr + "\n";
 				writer.write(result);
 			}
+				
 		}
 		writer.close();
 
@@ -515,7 +517,9 @@ class AppFrame extends JFrame {
 					if (!command.equalsIgnoreCase("Delete prompt.") 
 					&& !command.equalsIgnoreCase("Delete prompt")
 					&& !command.equalsIgnoreCase("Clear All.")
-					&& !command.equalsIgnoreCase("Clear All")) {
+					&& !command.equalsIgnoreCase("Clear All")
+					&& !command.equalsIgnoreCase("Setup email.")
+					&& !command.equalsIgnoreCase("Setup email")) {
 						Answer newAnswer = mainscreen.AskQuestion(newQuestion);
 						mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
 					}
@@ -613,7 +617,7 @@ class AppFrame extends JFrame {
 		}
 
 		if (command.equalsIgnoreCase("Setup email.") || command.equalsIgnoreCase("Setup email")) {
-
+			new SetupUI();
 		}
 
 	}
@@ -718,30 +722,68 @@ class AccountUI extends JFrame {
 
 }
 
-class SetupUI extends JFrame {
-	private JTextField firstNameField, lastNameField, displayNameField, emailAddressField, emailPasswordField, smtpHostField, tlsPortField; 
+class SetupUI extends JFrame{
+	private JTextField firstNameField, lastNameField, displayNameField, emailAddressField, emailPasswordField, smtpHostField, tlsPortField;
+
+	String autologin;
+	String preEmail;
+	String prePassword;
+	String firstName;
+	String lastName;
+	String displayName;
+	String emailAddress;
+	String emailPassword;
+	String SMTPHost;
+	String TLSPort;
+	
+	public void storeInformation() throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"));
+		String line;
+		if ((line = reader.readLine()) != null){
+			String[] values = line.split(" ");
+			this.autologin = values[0];
+			this.preEmail = values[1];
+			this.prePassword = values[2];
+			this.firstName = values[3];
+			this.lastName = values[4];
+			this.displayName = values[5];
+			this.emailAddress = values[6];
+			this.emailPassword = values[7];
+			this.SMTPHost = values[8];
+			this.TLSPort = values[9];
+		}
+		reader.close();
+	}
+
+	// Store each value in separate variables
+	
 
 	public SetupUI() {
+		try {
+			storeInformation();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		JLabel firstNameLabel = new JLabel("First Name:");
-        firstNameField = new JTextField(20);
+        firstNameField = new JTextField(firstName,20);
 
         JLabel lastNameLabel = new JLabel("Last Name:");
-        lastNameField = new JTextField(20);
+        lastNameField = new JTextField(lastName,20);
 
         JLabel displayNameLabel = new JLabel("Display Name:");
-        displayNameField = new JTextField(20);
+        displayNameField = new JTextField(displayName,20);
 
         JLabel emailAddressLabel = new JLabel("Email Address:");
-        emailAddressField = new JTextField(20);
+        emailAddressField = new JTextField(emailAddress,20);
 		
 		JLabel passwordLabel = new JLabel("Email Password:");
-        emailPasswordField = new JPasswordField(20);
+        emailPasswordField = new JTextField(emailPassword,20);
         
 		JLabel smtpHostLabel = new JLabel("SMTP Host:");
-        smtpHostField = new JTextField(20);
+        smtpHostField = new JTextField(SMTPHost,20);
 
         JLabel tlsPortLabel = new JLabel("TLS Port:");
-        tlsPortField = new JTextField(20);
+        tlsPortField = new JTextField(TLSPort,20);
 
         JButton saveButton = new JButton("Save");
 		saveButton.addActionListener((new ActionListener() {
@@ -754,8 +796,15 @@ class SetupUI extends JFrame {
 				String emailPassword = emailPasswordField.getText();
     			String smtpHost = smtpHostField.getText();
     			String tlsPort = tlsPortField.getText();
+				try {
+					storeInformation();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 
 				new Update(firstName, lastName, displayName, emailAddress, emailPassword, smtpHost, tlsPort);
+				JOptionPane.showMessageDialog(null, "Email Setup Saved.");
+				dispose();
 			}
 		}));
 
@@ -776,12 +825,13 @@ class SetupUI extends JFrame {
         panel.add(displayNameField);
         panel.add(emailAddressLabel);
         panel.add(emailAddressField);
+		panel.add(passwordLabel);
+        panel.add(emailPasswordField);
         panel.add(smtpHostLabel);
         panel.add(smtpHostField);
         panel.add(tlsPortLabel);
         panel.add(tlsPortField);
-        panel.add(passwordLabel);
-        panel.add(emailPasswordField);
+
         panel.add(saveButton);
         panel.add(cancelButton);
 
@@ -798,6 +848,22 @@ class SetupUI extends JFrame {
 public class AudioGPT {
 	static boolean autologin;
 	public static void main(String[] args) throws Exception {
+		// reading setting file
+		try {
+			File file = new File("credentials.txt");
+			Scanner scanner = new Scanner(file);
+			int number = scanner.nextInt();
+			if (number == 0) {
+				autologin = false;
+			}
+			else {
+				autologin = true;
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found: " + "credentials.txt");
+			e.printStackTrace();
+		}
 		if (autologin) {
 			new AppFrame();
 		}
