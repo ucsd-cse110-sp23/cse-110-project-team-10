@@ -1,4 +1,4 @@
-package main.java.gradle;
+package gradle;
 
 import org.junit.jupiter.api.Test;
 

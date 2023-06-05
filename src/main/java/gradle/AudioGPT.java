@@ -581,7 +581,7 @@ class AppFrame extends JFrame {
 		targetDataLine.close();
 	}
 
-	void processVoiceCommand(String command) {
+	public void processVoiceCommand(String command) {
 		if (command.equalsIgnoreCase("Delete prompt.") || command.equalsIgnoreCase("Delete prompt")) {
 			mainscreen.removeAll();
 			mainscreen.revalidate();
@@ -616,7 +616,7 @@ class AppFrame extends JFrame {
 
 }
 
-class CreateAccountUI extends JFrame {
+class AccountUI extends JFrame {
 		
 	private JTextField emailField;
 	private JPasswordField passwordField;
@@ -624,9 +624,9 @@ class CreateAccountUI extends JFrame {
 
 	// private JButton createButton;
 
-	public CreateAccountUI() {
+	public AccountUI() {
 
-		setTitle("Create Account");
+		setTitle("Welcome to AudioGPT");
         setSize(400, 200);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -641,8 +641,19 @@ class CreateAccountUI extends JFrame {
         passwordField = new JPasswordField(20);
         verifyPasswordField = new JPasswordField(20);
 
-        // Create the create account button
+        // Create the create account button and the login button
         JButton createAccountButton = new JButton("Create Account");
+		JButton loginButton = new JButton("Log In");
+
+		JPanel accountPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+		accountPanel.add(emailLabel);
+        accountPanel.add(emailField);
+        accountPanel.add(passwordLabel);
+        accountPanel.add(passwordField);
+		accountPanel.add(verifyPasswordLabel);
+		accountPanel.add(verifyPasswordField);
 
         // Add action listener to the create account button
         createAccountButton.addActionListener(new ActionListener() {
@@ -658,61 +669,58 @@ class CreateAccountUI extends JFrame {
                 } else if (!password.equals(verifyPassword)) {
                     JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    new Create(email, password);
-					try {
-						new AppFrame();
-					} catch (Exception e1) {
-						e1.printStackTrace();
+                    Create create = new Create(email, password);
+					if (!create.ex) {
+						dispose();
 					}
-                    //JOptionPane.showMessageDialog(null, "Account created successfully!");
-					dispose();
+					
                 }
             }
         });
 
+		loginButton.addActionListener((new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String email = emailField.getText();
+				String password = new String(passwordField.getPassword());
+                String verifyPassword = new String(verifyPasswordField.getPassword());
+
+				if (email.isEmpty() || password.isEmpty() || verifyPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!password.equals(verifyPassword)) {
+                    JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    Login login = new Login(email, password);
+					if (login.ex){
+						dispose();
+					}
+						
+                }
+			}
+		}));
+
+		// Add buttons to the button panel
+        buttonPanel.add(createAccountButton);
+        buttonPanel.add(loginButton);
+
         // Set the layout of the frame
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // Add components to the frame
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(emailLabel, gbc);
-
-        gbc.gridx = 1;
-        add(emailField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(passwordLabel, gbc);
-
-        gbc.gridx = 1;
-        add(passwordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(verifyPasswordLabel, gbc);
-
-        gbc.gridx = 1;
-        add(verifyPasswordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(createAccountButton, gbc);
+        setLayout(new BorderLayout());
+        add(accountPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         // Display the frame
         setVisible(true);
 
 	}
-}
 
+}
 public class AudioGPT {
+	static boolean autologin;
 	public static void main(String[] args) throws Exception {
-		//new AppFrame();
-		new CreateAccountUI();
+		if (autologin) {
+			new AppFrame();
+		}
+		else {
+			new AccountUI();
+		}
 	}
 }
