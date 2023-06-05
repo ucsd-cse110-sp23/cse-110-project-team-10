@@ -5,7 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-// import org.bson.types.ObjectId;
+import org.bson.types.ObjectId;
 import com.mongodb.client.FindIterable;
 
 import javax.swing.JOptionPane;
@@ -24,8 +24,8 @@ public class Login {
             MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
             MongoCollection<Document> userCollection = sampleTrainingDB.getCollection("Email");
 
-            // Document user = new Document("_id", new ObjectId());
-            Document user = new Document(email, password);
+            Document user = new Document("_id", new ObjectId());
+            //Document user = new Document(email, password);
 
             FindIterable<Document> results = userCollection.find(user);
             boolean exists = results.iterator().hasNext();

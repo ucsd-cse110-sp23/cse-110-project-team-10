@@ -5,7 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-// import org.bson.types.ObjectId;
+import org.bson.types.ObjectId;
 import com.mongodb.client.FindIterable;
 
 import static java.util.Arrays.asList;
@@ -26,8 +26,9 @@ public class Create {
             MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
             MongoCollection<Document> userCollection = sampleTrainingDB.getCollection("Email");
 
-            // Document user = new Document("_id", new ObjectId());
-            Document user = new Document(email, password);
+            Document user = new Document("_id", new ObjectId());
+            //Document user = new Document(email, password);
+
 
             FindIterable<Document> results = userCollection.find(user);
             boolean exists = results.iterator().hasNext();
@@ -36,9 +37,9 @@ public class Create {
                 JOptionPane.showMessageDialog(null, "Account already exists");
             }
             else {
-                // user.append("Email", email)
-                //     .append("Password", password)
-                    user.append("Settings", asList(new Document("type", "first name").append("email", ""),
+                user.append("Email", email)
+                    .append("Password", password)
+                    .append("Settings", asList(new Document("type", "first name").append("first", ""),
                                             new Document("type", "last name").append("last name", ""),
                                             new Document("type", "display name").append("display name", ""),
                                             new Document("type", "email address").append("email address", ""),

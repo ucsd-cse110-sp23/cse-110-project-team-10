@@ -612,6 +612,10 @@ class AppFrame extends JFrame {
 			}
 		}
 
+		if (command.equalsIgnoreCase("Setup email.") || command.equalsIgnoreCase("Setup email")) {
+
+		}
+
 	}
 
 }
@@ -713,6 +717,84 @@ class AccountUI extends JFrame {
 	}
 
 }
+
+class SetupUI extends JFrame {
+	private JTextField firstNameField, lastNameField, displayNameField, emailAddressField, emailPasswordField, smtpHostField, tlsPortField; 
+
+	public SetupUI() {
+		JLabel firstNameLabel = new JLabel("First Name:");
+        firstNameField = new JTextField(20);
+
+        JLabel lastNameLabel = new JLabel("Last Name:");
+        lastNameField = new JTextField(20);
+
+        JLabel displayNameLabel = new JLabel("Display Name:");
+        displayNameField = new JTextField(20);
+
+        JLabel emailAddressLabel = new JLabel("Email Address:");
+        emailAddressField = new JTextField(20);
+		
+		JLabel passwordLabel = new JLabel("Email Password:");
+        emailPasswordField = new JPasswordField(20);
+        
+		JLabel smtpHostLabel = new JLabel("SMTP Host:");
+        smtpHostField = new JTextField(20);
+
+        JLabel tlsPortLabel = new JLabel("TLS Port:");
+        tlsPortField = new JTextField(20);
+
+        JButton saveButton = new JButton("Save");
+		saveButton.addActionListener((new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String firstName = firstNameField.getText();
+    			String lastName = lastNameField.getText();
+    			String displayName = displayNameField.getText();
+    			String emailAddress = emailAddressField.getText();
+				String emailPassword = emailPasswordField.getText();
+    			String smtpHost = smtpHostField.getText();
+    			String tlsPort = tlsPortField.getText();
+
+				new Update(firstName, lastName, displayName, emailAddress, emailPassword, smtpHost, tlsPort);
+			}
+		}));
+
+		JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+
+		JPanel panel = new JPanel(new GridLayout(8, 2));
+        panel.add(firstNameLabel);
+        panel.add(firstNameField);
+        panel.add(lastNameLabel);
+        panel.add(lastNameField);
+        panel.add(displayNameLabel);
+        panel.add(displayNameField);
+        panel.add(emailAddressLabel);
+        panel.add(emailAddressField);
+        panel.add(smtpHostLabel);
+        panel.add(smtpHostField);
+        panel.add(tlsPortLabel);
+        panel.add(tlsPortField);
+        panel.add(passwordLabel);
+        panel.add(emailPasswordField);
+        panel.add(saveButton);
+        panel.add(cancelButton);
+
+        add(panel);
+
+        setTitle("Email Setup");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
+	}
+}
+
+
 public class AudioGPT {
 	static boolean autologin;
 	public static void main(String[] args) throws Exception {
