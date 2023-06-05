@@ -77,7 +77,7 @@ public class CreateAccountBDDTests {
     private MockCreateAccountUI mockCreateAccountUI;
 
     
-    String uri = "mongodb+srv://joseph:I2GC8oDDOoL4a9Cu@cluster0.4kpzovg.mongodb.net/?retryWrites=true&w=majority";
+    String uri = "mongodb+srv://haz042:Dan13697748680@lab7.nxlm4ex.mongodb.net/?retryWrites=true&w=majority";
     MongoClient mongoClient = MongoClients.create(uri);
     MongoDatabase sampleTrainingDB = mongoClient.getDatabase("Project");
     MongoCollection<Document> userCollection = sampleTrainingDB.getCollection("Email");
