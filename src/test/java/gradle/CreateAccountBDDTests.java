@@ -100,7 +100,7 @@ public class CreateAccountBDDTests {
         mockCreateAccountUI.setVerifyPasswordField("password");
         mockCreateAccountUI.createAccount();
         
-        assertEquals(size,userCollection.countDocuments());
+        assertEquals(size+1,userCollection.countDocuments());
 
     }
 
