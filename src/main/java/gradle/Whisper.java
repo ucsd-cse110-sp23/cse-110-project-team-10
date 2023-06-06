@@ -6,7 +6,7 @@ import org.json.*;
 
 public class Whisper {
 	 private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
-	 private static final String TOKEN = "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";
+	 private static final String TOKEN = "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";
 	 private static final String MODEL = "whisper-1";
 	 private static final String FILE_PATH = "/Users/jierubai/Downloads/Lab4Audio.mp3";
 	 
