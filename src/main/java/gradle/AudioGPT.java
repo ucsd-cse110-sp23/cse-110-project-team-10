@@ -698,7 +698,7 @@ class AccountUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Login login = new Login(email, password);
-					if (login.ex){
+					if (login.emailEx && login.passwordEx){
 						dispose();
 					}
 						
