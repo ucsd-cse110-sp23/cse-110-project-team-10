@@ -33,7 +33,7 @@ public class Login {
             MongoCollection<Document> userCollection = ProjectDB.getCollection("Email");
 
             // Document user = new Document("_id", new ObjectId());
-            Document user = new Document(email, password);
+            Document user = new Document("Email", email);
 
             FindIterable<Document> results = userCollection.find(user);
             boolean exists = results.iterator().hasNext();
