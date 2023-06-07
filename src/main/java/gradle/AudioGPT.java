@@ -138,6 +138,7 @@ class MainScreen extends JPanel {
 	Whisper whisper;
 	ChatGPT chatgpt;
 	String displayName;
+	Answer newAnswer;
 
 	public MainScreen(Whisper whisper, ChatGPT chatgpt) throws Exception {
 		UUID questionId = UUID.randomUUID();
@@ -176,17 +177,29 @@ class MainScreen extends JPanel {
 		newQuestion.updateContent();
 
 		//create email case
-		String createEmail = newQuestion.toString();
+		String emailCommand = newQuestion.toString();
 		
 		
-		if (createEmail.contains("Create email")){
+		if (emailCommand.contains("Create email")){
 			this.setName();
-			createEmail = createEmail + "add Best Regards and my name " + displayName + " at the end.";
-			newQuestion.setString(createEmail);
+			emailCommand = emailCommand + " add Best Regards and my name " + displayName + " at the end.";
+			newQuestion.setString(emailCommand);
 		}
-
 		
 		newAnswer.updateContent(newQuestion.toString());
+		
+		if (emailCommand.contains("Create email")) {
+			File file = new File("generatedEmail.txt");
+			file.delete();
+
+			try {
+				FileWriter fileWriter = new FileWriter("generatedEmail.txt");
+				fileWriter.write(newAnswer.toString());
+				fileWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		removeAll();
 		add(newQuestion, 0); // add the latest question panel to the first row (index 0) of the GridLayout
@@ -481,6 +494,14 @@ class AppFrame extends JFrame {
 	private MainScreen mainscreen;
 	private QuestionHistory questionhistory;
 	private SetupUI setupui;
+	String displayName;
+	String senderEmail;
+	String password;
+	String SMTPHost;
+	String TLSPort;
+	String to;
+	String subject;
+	String content;
 	Whisper whisper;
 	ChatGPT chatgpt;
 
@@ -551,7 +572,9 @@ class AppFrame extends JFrame {
 					&& !command.equalsIgnoreCase("Clear All.")
 					&& !command.equalsIgnoreCase("Clear All")
 					&& !command.equalsIgnoreCase("Setup email.")
-					&& !command.equalsIgnoreCase("Setup email")) {
+					&& !command.equalsIgnoreCase("Setup email")
+					&& !command.equalsIgnoreCase("Set up email.")
+					&& !command.equalsIgnoreCase("Set up email")) {
 	
 					Answer newAnswer = mainscreen.AskQuestion(newQuestion);
 					mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
@@ -650,9 +673,79 @@ class AppFrame extends JFrame {
 			}
 		}
 
-		if (command.equalsIgnoreCase("Setup email") || command.equalsIgnoreCase("Set up email")) {
+		if (command.equalsIgnoreCase("Setup email.") || command.equalsIgnoreCase("Setup email")
+		 || command.equalsIgnoreCase("Set up email") || command.equalsIgnoreCase("Set up email.")) {
 			this.setupui = new SetupUI();
+		}
+
+		if (command.contains("Send email")) {
+			File file = new File("recipient.txt");
+			file.delete();
+			String fileName = "recipient.txt";
+			try {
+				FileWriter fileWriter = new FileWriter(fileName);
+				fileWriter.write(command);
+				fileWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try(BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"))){
+				String line;
+
+				if ((line = reader.readLine()) != null){
+					String[] values = line.split(" ");
+					this.displayName = values[5];
+					this.senderEmail = values[6];
+					this.password = values[7];
+					this.SMTPHost = values[8];
+					this.TLSPort = values[9];
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
+			try(BufferedReader br = new BufferedReader(new FileReader("recipient.txt"))) {
+				String ln;
+				this.to = "";
+				if ((ln = br.readLine()) != null) {
+					String[] values = ln.split(" ");
+					this.to = values[3] + "@" + values[5];
+					if (this.to.endsWith(".")) {
+						this.to = this.to.substring(0, this.to.length() - 1);
+					}
+				}
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			String commandline = mainscreen.getQuestionOnMain().toString();
+			String[] subjectline = commandline.split(" ");
+			this.subject = "";
+			for (int i = 3; i < subjectline.length; i++) {
+				this.subject = this.subject + " " + subjectline[i];
+			}
+			int index = subject.indexOf("add");
+			if (index != -1) {
+    			this.subject = subject.substring(0, index);
+			}
+			
+			StringBuilder content = new StringBuilder();
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader("generatedEmail.txt"));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					content.append(line).append("\n");
+				}
+				
+				this.content = content.toString();;
+				reader.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			new SendEmail(senderEmail, password, displayName, SMTPHost, TLSPort, to, subject, this.content);
 		}
 
 	}

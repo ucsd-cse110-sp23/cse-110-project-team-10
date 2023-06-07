@@ -23,7 +23,7 @@ public class Create {
     public Create(String email, String password) {
         // generate setting file
         String fileName = "credentials.txt";
-        String content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name " + "Fill_in_display_name " + " " + "Fill_in_email_address " + "Fill_in_email_password " + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
+        String content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name " + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password " + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
 
         try {
             FileWriter fileWriter = new FileWriter(fileName);

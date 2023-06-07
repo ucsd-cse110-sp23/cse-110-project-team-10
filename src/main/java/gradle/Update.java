@@ -82,7 +82,7 @@ public class Update {
                                                 new Document("type", "TLS port").append("TLS port", TLSPort)));
 
                 // update one document
-                Bson filter = eq(email, password);
+                Bson filter = eq("Email", email);
                 ReplaceOptions opts = new ReplaceOptions().upsert(true);
                 usersCollection.replaceOne(filter, updatedDocument, opts);
 
