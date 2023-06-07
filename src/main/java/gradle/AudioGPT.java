@@ -187,19 +187,6 @@ class MainScreen extends JPanel {
 		}
 		
 		newAnswer.updateContent(newQuestion.toString());
-		
-		if (emailCommand.contains("Create email")) {
-			File file = new File("generatedEmail.txt");
-			file.delete();
-
-			try {
-				FileWriter fileWriter = new FileWriter("generatedEmail.txt");
-				fileWriter.write(newAnswer.toString());
-				fileWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 
 		removeAll();
 		add(newQuestion, 0); // add the latest question panel to the first row (index 0) of the GridLayout
@@ -425,14 +412,6 @@ class Footer extends JPanel {
 		layout.setHgap(5);
 		this.setLayout(layout);
 
-		// deleteButton = new JButton("Delete Question");
-		// deleteButton.setFont(new Font("San-serif", Font.ITALIC, 10));
-		// this.add(deleteButton);
-
-		// clearAllButton = new JButton("Clear All Question");
-		// clearAllButton.setFont(new Font("San-serif", Font.ITALIC, 10));
-		// this.add(clearAllButton);
-
 		askButton = new JButton("Start");
 		askButton.setFont(new Font("San-serif", Font.ITALIC, 10));
 		this.add(askButton);
@@ -452,14 +431,6 @@ class Footer extends JPanel {
 	public JButton getaskButton() {
 		return askButton;
 	}
-
-	// public JButton getDeleteButton() {
-	// 	return deleteButton;
-	// }
-
-	// public JButton getClearButton() {
-	// 	return clearAllButton;
-	// }
 
 	public JButton getstopButton() {
 		return stopButton;
@@ -507,8 +478,6 @@ class AppFrame extends JFrame {
 
 	private JButton askButton;
 	private JButton stopButton;
-	// private JButton deleteButton;
-	// private JButton clearButton;
 
 	private AudioFormat audioFormat;
 	private TargetDataLine targetDataLine;
@@ -536,8 +505,6 @@ class AppFrame extends JFrame {
 		askButton = footer.getaskButton();
 		stopButton = footer.getstopButton();
 
-		// deleteButton = footer.getDeleteButton();
-		// clearButton = footer.getClearButton();
 		recordingLabel = footer.getrecordingLabel();
 
 		audioFormat = getAudioFormat();
@@ -574,7 +541,8 @@ class AppFrame extends JFrame {
 					&& !command.equalsIgnoreCase("Setup email.")
 					&& !command.equalsIgnoreCase("Setup email")
 					&& !command.equalsIgnoreCase("Set up email.")
-					&& !command.equalsIgnoreCase("Set up email")) {
+					&& !command.equalsIgnoreCase("Set up email")
+					&& !command.contains("Send email")) {
 	
 					Answer newAnswer = mainscreen.AskQuestion(newQuestion);
 					mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
@@ -651,8 +619,6 @@ class AppFrame extends JFrame {
 			try {
 				OldQuestion toDelete = null;
 				for (Component i : questionhistory.getComponents()) {
-					System.out.println(((OldQuestion) i).question.getId());
-					System.out.println(mainscreen.getQuestionOnMain().getId());
 					if (i instanceof OldQuestion && ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
 						toDelete = (OldQuestion) i;
 						break;
@@ -730,26 +696,30 @@ class AppFrame extends JFrame {
 			if (index != -1) {
     			this.subject = subject.substring(0, index);
 			}
-			
-			StringBuilder content = new StringBuilder();
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader("generatedEmail.txt"));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					content.append(line).append("\n");
-				}
-				
-				this.content = content.toString();;
-				reader.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 
+			try {
+				OldQuestion question = null;
+				for (Component i : questionhistory.getComponents()) {
+					if (i instanceof OldQuestion && ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
+						question = (OldQuestion) i;
+						setContent(question);
+						break;
+					}
+				}
+
+			} catch (Exception exc) {
+				exc.printStackTrace();
+			}
+			
 			new SendEmail(senderEmail, password, displayName, SMTPHost, TLSPort, to, subject, this.content);
+
 		}
+		
 
 	}
-
+	public void setContent(OldQuestion question) throws Exception {
+			this.content = question.answer.toString();
+		}
 }
 
 class AccountUI extends JFrame {

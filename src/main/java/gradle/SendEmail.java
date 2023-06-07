@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 
 public class SendEmail {
 
-
 	public SendEmail(String senderEmail, String password, String displayName, String SMTPHost, String TLSPort, String to, String subject, String content ) {
 
 		// Set Properties
@@ -63,6 +62,7 @@ public class SendEmail {
 			message.setContent( content, "text/html; charset=utf-8" );
 
 			Transport.send(message);
+			JOptionPane.showMessageDialog(null, "Email successfully sent.");
 
 		} 
 		catch( MessagingException exc ) {
