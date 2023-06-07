@@ -181,7 +181,7 @@ public class Login {
                 
             }
             else {
-                JOptionPane.showMessageDialog(null, "Email doesn't exists");
+                JOptionPane.showMessageDialog(null, "Email doesn't exist");
             }
             
         }

@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.Popup;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,6 +76,7 @@ class MockCreateAccountUI{
 }
 public class CreateAccountBDDTests {
     private MockCreateAccountUI mockCreateAccountUI;
+    private Random random;
 
     
     String uri = "mongodb+srv://haz042:Dan13697748680@lab7.nxlm4ex.mongodb.net/?retryWrites=true&w=majority";
@@ -90,14 +92,16 @@ public class CreateAccountBDDTests {
     @BeforeEach
 	public void setup() throws Exception {
 		mockCreateAccountUI = new MockCreateAccountUI();
+        random = new Random();
 	}
 
     @Test
     public void testCreateAccount() throws Exception{
         long size = userCollection.countDocuments();
-        mockCreateAccountUI.setEmailField("joseph@gmail.com");
-        mockCreateAccountUI.setPasswordField("password");
-        mockCreateAccountUI.setVerifyPasswordField("password");
+        String pass = String.valueOf(random.ints(8));
+        mockCreateAccountUI.setEmailField(pass + "@gmail.com");
+        mockCreateAccountUI.setPasswordField(pass);
+        mockCreateAccountUI.setVerifyPasswordField(pass);
         mockCreateAccountUI.createAccount();
         
         assertEquals(size+1,userCollection.countDocuments());
