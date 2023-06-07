@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="gradle.testMainScreen" tests="3" skipped="0" failures="0" errors="0" timestamp="2023-06-07T08:29:39" hostname="Vincents-MacBook-Air.local" time="0.014">
+  <properties/>
+  <testcase name="testAskQuestion()" classname="gradle.testMainScreen" time="0.006"/>
+  <testcase name="testClearAll()" classname="gradle.testMainScreen" time="0.004"/>
+  <testcase name="testSetAndGetQuestionOnMain()" classname="gradle.testMainScreen" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -19,11 +19,15 @@ repositories {
 dependencies {
     implementation files('lib/json-20230227.jar')
 
-    // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
 
-    // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
+
+    implementation 'javax.mail:javax.mail-api:1.6.2'
+
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+
+    implementation 'org.mongodb:mongodb-driver-sync:4.9.1'
 }
 
 application {
@@ -36,11 +40,3 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-dependencies {
-  implementation 'org.mongodb:mongodb-driver-sync:4.9.1'
-}
-
-dependencies {
-    implementation 'javax.mail:javax.mail-api:1.6.2'
-    implementation 'com.sun.mail:javax.mail:1.6.2'
-}

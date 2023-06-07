@@ -745,7 +745,16 @@ class AppFrame extends JFrame {
 				e.printStackTrace();
 			}
 
-			new SendEmail(senderEmail, password, displayName, SMTPHost, TLSPort, to, subject, this.content);
+			SendEmail email = new SendEmail(senderEmail, password, SMTPHost, TLSPort, displayName);
+			Boolean didSend = email.sendEmail(to, this.content, subject);
+
+			if(didSend == true){
+				//it worked
+				System.out.println("Worked");
+			} else{
+				//it did not
+				System.out.println("did not work");
+			}
 		}
 
 	}

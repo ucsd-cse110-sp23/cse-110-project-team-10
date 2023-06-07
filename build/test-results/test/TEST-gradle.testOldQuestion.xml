@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="gradle.testOldQuestion" tests="3" skipped="0" failures="0" errors="0" timestamp="2023-06-07T08:29:39" hostname="Vincents-MacBook-Air.local" time="0.015">
+  <properties/>
+  <testcase name="testAToString()" classname="gradle.testOldQuestion" time="0.004"/>
+  <testcase name="testQToString()" classname="gradle.testOldQuestion" time="0.005"/>
+  <testcase name="testCheckIfOnMain()" classname="gradle.testOldQuestion" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
