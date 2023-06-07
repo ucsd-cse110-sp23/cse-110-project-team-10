@@ -1,9 +1,9 @@
-package main.java.gradle;
+package gradle;
 
 import org.junit.jupiter.api.Test;
 
-import main.java.gradle.testProcessCommands.MockMainScreen;
-import main.java.gradle.testProcessCommands.MockQuestionHistory;
+// import gradle.testProcessCommands.MockMainScreen;
+// import gradle.testProcessCommands.MockQuestionHistory;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
