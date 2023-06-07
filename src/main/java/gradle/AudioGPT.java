@@ -4,6 +4,7 @@ import java.awt.*;
 // import java.awt.desktop.QuitEvent;
 import java.io.*;
 import java.util.*;
+import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -136,6 +137,8 @@ class MainScreen extends JPanel {
 	Question questionOnMain;
 	Whisper whisper;
 	ChatGPT chatgpt;
+	String displayName;
+	Answer newAnswer;
 
 	public MainScreen(Whisper whisper, ChatGPT chatgpt) throws Exception {
 		UUID questionId = UUID.randomUUID();
@@ -147,6 +150,7 @@ class MainScreen extends JPanel {
 		this.setLayout(layout);
 		this.setPreferredSize(new Dimension(600, 560));
 		this.setBackground(backgroundColor);
+		
 
 		this.whisper = whisper;
 		this.chatgpt = chatgpt;
@@ -154,10 +158,34 @@ class MainScreen extends JPanel {
 		revalidate();
 		repaint();
 	}
+	public void setName(){
+		try (BufferedReader br = new BufferedReader(new FileReader("credentials.txt"))) {
+            String line = br.readLine();
+            if (line != null) {
+                String[] columns = line.split(" ");
+            
+                    displayName = columns[5];
+                
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
 
 	public Answer AskQuestion(Question newQuestion) throws Exception {
 		Answer newAnswer = new Answer(chatgpt);
 		newQuestion.updateContent();
+
+		//create email case
+		String emailCommand = newQuestion.toString();
+		
+		
+		if (emailCommand.contains("Create email")){
+			this.setName();
+			emailCommand = emailCommand + " add Best Regards and my name " + displayName + " at the end.";
+			newQuestion.setString(emailCommand);
+		}
+		
 		newAnswer.updateContent(newQuestion.toString());
 
 		removeAll();
@@ -169,6 +197,8 @@ class MainScreen extends JPanel {
 		repaint();
 		return newAnswer;
 	}
+
+	
 
 	public OldQuestion updateHistory(Question question, Answer answer, QuestionHistory questionhistory) throws Exception {
 		OldQuestion oldquestion = new OldQuestion(question, answer, this, questionhistory);
@@ -236,6 +266,7 @@ class QuestionHistory extends JPanel {
 				String result = id.toString() + "|" + questionstr + "|" + answerstr + "\n";
 				writer.write(result);
 			}
+				
 		}
 		writer.close();
 
@@ -381,14 +412,6 @@ class Footer extends JPanel {
 		layout.setHgap(5);
 		this.setLayout(layout);
 
-		// deleteButton = new JButton("Delete Question");
-		// deleteButton.setFont(new Font("San-serif", Font.ITALIC, 10));
-		// this.add(deleteButton);
-
-		// clearAllButton = new JButton("Clear All Question");
-		// clearAllButton.setFont(new Font("San-serif", Font.ITALIC, 10));
-		// this.add(clearAllButton);
-
 		askButton = new JButton("Start");
 		askButton.setFont(new Font("San-serif", Font.ITALIC, 10));
 		this.add(askButton);
@@ -408,14 +431,6 @@ class Footer extends JPanel {
 	public JButton getaskButton() {
 		return askButton;
 	}
-
-	// public JButton getDeleteButton() {
-	// 	return deleteButton;
-	// }
-
-	// public JButton getClearButton() {
-	// 	return clearAllButton;
-	// }
 
 	public JButton getstopButton() {
 		return stopButton;
@@ -449,18 +464,26 @@ class AppFrame extends JFrame {
 	private Footer footer;
 	private MainScreen mainscreen;
 	private QuestionHistory questionhistory;
+	private SetupUI setupui;
+	String displayName;
+	String senderEmail;
+	String password;
+	String SMTPHost;
+	String TLSPort;
+	String to;
+	String subject;
+	String content;
 	Whisper whisper;
 	ChatGPT chatgpt;
 
 	private JButton askButton;
 	private JButton stopButton;
-	// private JButton deleteButton;
-	// private JButton clearButton;
 
 	private AudioFormat audioFormat;
 	private TargetDataLine targetDataLine;
 	private JLabel recordingLabel;
 
+	
 	public AppFrame() throws Exception {
 		whisper = new Whisper();
 		chatgpt = new ChatGPT();
@@ -482,8 +505,6 @@ class AppFrame extends JFrame {
 		askButton = footer.getaskButton();
 		stopButton = footer.getstopButton();
 
-		// deleteButton = footer.getDeleteButton();
-		// clearButton = footer.getClearButton();
 		recordingLabel = footer.getrecordingLabel();
 
 		audioFormat = getAudioFormat();
@@ -512,12 +533,20 @@ class AppFrame extends JFrame {
 					Question newQuestion = new Question(whisper, questionId);
 					String command = whisper.transcribe("recording.wav");
 					processVoiceCommand(command);
+					
 					if (!command.equalsIgnoreCase("Delete prompt.") 
 					&& !command.equalsIgnoreCase("Delete prompt")
 					&& !command.equalsIgnoreCase("Clear All.")
-					&& !command.equalsIgnoreCase("Clear All")) {
-						Answer newAnswer = mainscreen.AskQuestion(newQuestion);
-						mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
+					&& !command.equalsIgnoreCase("Clear All")
+					&& !command.equalsIgnoreCase("Setup email.")
+					&& !command.equalsIgnoreCase("Setup email")
+					&& !command.equalsIgnoreCase("Set up email.")
+					&& !command.equalsIgnoreCase("Set up email")
+					&& !command.contains("Send email")) {
+	
+					Answer newAnswer = mainscreen.AskQuestion(newQuestion);
+					mainscreen.updateHistory(newQuestion, newAnswer, questionhistory);
+						
 					}
 					
 				} catch (Exception exc) {
@@ -581,7 +610,7 @@ class AppFrame extends JFrame {
 		targetDataLine.close();
 	}
 
-	void processVoiceCommand(String command) {
+	public void processVoiceCommand(String command) {
 		if (command.equalsIgnoreCase("Delete prompt.") || command.equalsIgnoreCase("Delete prompt")) {
 			mainscreen.removeAll();
 			mainscreen.revalidate();
@@ -590,8 +619,6 @@ class AppFrame extends JFrame {
 			try {
 				OldQuestion toDelete = null;
 				for (Component i : questionhistory.getComponents()) {
-					System.out.println(((OldQuestion) i).question.getId());
-					System.out.println(mainscreen.getQuestionOnMain().getId());
 					if (i instanceof OldQuestion && ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
 						toDelete = (OldQuestion) i;
 						break;
@@ -612,11 +639,90 @@ class AppFrame extends JFrame {
 			}
 		}
 
-	}
+		if (command.equalsIgnoreCase("Setup email.") || command.equalsIgnoreCase("Setup email")
+		 || command.equalsIgnoreCase("Set up email") || command.equalsIgnoreCase("Set up email.")) {
+			this.setupui = new SetupUI();
+		}
 
+		if (command.contains("Send email")) {
+			File file = new File("recipient.txt");
+			file.delete();
+			String fileName = "recipient.txt";
+			try {
+				FileWriter fileWriter = new FileWriter(fileName);
+				fileWriter.write(command);
+				fileWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try(BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"))){
+				String line;
+
+				if ((line = reader.readLine()) != null){
+					String[] values = line.split(" ");
+					this.displayName = values[5];
+					this.senderEmail = values[6];
+					this.password = values[7];
+					this.SMTPHost = values[8];
+					this.TLSPort = values[9];
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			try(BufferedReader br = new BufferedReader(new FileReader("recipient.txt"))) {
+				String ln;
+				this.to = "";
+				if ((ln = br.readLine()) != null) {
+					String[] values = ln.split(" ");
+					this.to = values[3] + "@" + values[5];
+					if (this.to.endsWith(".")) {
+						this.to = this.to.substring(0, this.to.length() - 1);
+					}
+				}
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			String commandline = mainscreen.getQuestionOnMain().toString();
+			String[] subjectline = commandline.split(" ");
+			this.subject = "";
+			for (int i = 3; i < subjectline.length; i++) {
+				this.subject = this.subject + " " + subjectline[i];
+			}
+			int index = subject.indexOf("add");
+			if (index != -1) {
+    			this.subject = subject.substring(0, index);
+			}
+
+			try {
+				OldQuestion question = null;
+				for (Component i : questionhistory.getComponents()) {
+					if (i instanceof OldQuestion && ((OldQuestion) i).question.getId().equals(mainscreen.getQuestionOnMain().getId())) {
+						question = (OldQuestion) i;
+						setContent(question);
+						break;
+					}
+				}
+
+			} catch (Exception exc) {
+				exc.printStackTrace();
+			}
+			
+			new SendEmail(senderEmail, password, displayName, SMTPHost, TLSPort, to, subject, this.content);
+
+		}
+		
+
+	}
+	public void setContent(OldQuestion question) throws Exception {
+			this.content = question.answer.toString();
+		}
 }
 
-class CreateAccountUI extends JFrame {
+class AccountUI extends JFrame {
 		
 	private JTextField emailField;
 	private JPasswordField passwordField;
@@ -624,9 +730,9 @@ class CreateAccountUI extends JFrame {
 
 	// private JButton createButton;
 
-	public CreateAccountUI() {
+	public AccountUI() {
 
-		setTitle("Create Account");
+		setTitle("Welcome to AudioGPT");
         setSize(400, 200);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -641,8 +747,19 @@ class CreateAccountUI extends JFrame {
         passwordField = new JPasswordField(20);
         verifyPasswordField = new JPasswordField(20);
 
-        // Create the create account button
+        // Create the create account button and the login button
         JButton createAccountButton = new JButton("Create Account");
+		JButton loginButton = new JButton("Log In");
+
+		JPanel accountPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+		accountPanel.add(emailLabel);
+        accountPanel.add(emailField);
+        accountPanel.add(passwordLabel);
+        accountPanel.add(passwordField);
+		accountPanel.add(verifyPasswordLabel);
+		accountPanel.add(verifyPasswordField);
 
         // Add action listener to the create account button
         createAccountButton.addActionListener(new ActionListener() {
@@ -658,61 +775,201 @@ class CreateAccountUI extends JFrame {
                 } else if (!password.equals(verifyPassword)) {
                     JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    new Create(email, password);
-					try {
-						new AppFrame();
-					} catch (Exception e1) {
-						e1.printStackTrace();
+                    Create create = new Create(email, password);
+					if (!create.ex) {
+						dispose();
 					}
-                    //JOptionPane.showMessageDialog(null, "Account created successfully!");
-					dispose();
+					
                 }
             }
         });
 
+		loginButton.addActionListener((new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String email = emailField.getText();
+				String password = new String(passwordField.getPassword());
+                String verifyPassword = new String(verifyPasswordField.getPassword());
+
+				if (email.isEmpty() || password.isEmpty() || verifyPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!password.equals(verifyPassword)) {
+                    JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    Login login = new Login(email, password);
+					if (login.emailEx && login.passwordEx){
+						dispose();
+					}
+						
+                }
+			}
+		}));
+
+		// Add buttons to the button panel
+        buttonPanel.add(createAccountButton);
+        buttonPanel.add(loginButton);
+
         // Set the layout of the frame
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // Add components to the frame
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(emailLabel, gbc);
-
-        gbc.gridx = 1;
-        add(emailField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(passwordLabel, gbc);
-
-        gbc.gridx = 1;
-        add(passwordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(verifyPasswordLabel, gbc);
-
-        gbc.gridx = 1;
-        add(verifyPasswordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(createAccountButton, gbc);
+        setLayout(new BorderLayout());
+        add(accountPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         // Display the frame
         setVisible(true);
 
 	}
+
 }
 
+class SetupUI extends JFrame{
+	private JTextField firstNameField, lastNameField, displayNameField, emailAddressField, emailPasswordField, smtpHostField, tlsPortField;
+
+	String autologin;
+	String preEmail;
+	String prePassword;
+	String firstName;
+	String lastName;
+	String displayName;
+	String emailAddress;
+	String emailPassword;
+	String SMTPHost;
+	String TLSPort;
+	
+	public void storeInformation() throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"));
+		String line;
+		if ((line = reader.readLine()) != null){
+			String[] values = line.split(" ");
+			this.autologin = values[0];
+			this.preEmail = values[1];
+			this.prePassword = values[2];
+			this.firstName = values[3];
+			this.lastName = values[4];
+			this.displayName = values[5];
+			this.emailAddress = values[6];
+			this.emailPassword = values[7];
+			this.SMTPHost = values[8];
+			this.TLSPort = values[9];
+		}
+		reader.close();
+	}
+
+	// Store each value in separate variables
+	
+
+	public SetupUI() {
+		try {
+			storeInformation();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		JLabel firstNameLabel = new JLabel("First Name:");
+        firstNameField = new JTextField(firstName,20);
+
+        JLabel lastNameLabel = new JLabel("Last Name:");
+        lastNameField = new JTextField(lastName,20);
+
+        JLabel displayNameLabel = new JLabel("Display Name:");
+        displayNameField = new JTextField(displayName,20);
+
+        JLabel emailAddressLabel = new JLabel("Email Address:");
+        emailAddressField = new JTextField(emailAddress,20);
+		
+		JLabel passwordLabel = new JLabel("Email Password:");
+        emailPasswordField = new JTextField(emailPassword,20);
+        
+		JLabel smtpHostLabel = new JLabel("SMTP Host:");
+        smtpHostField = new JTextField(SMTPHost,20);
+
+        JLabel tlsPortLabel = new JLabel("TLS Port:");
+        tlsPortField = new JTextField(TLSPort,20);
+
+        JButton saveButton = new JButton("Save");
+		saveButton.addActionListener((new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String firstName = firstNameField.getText();
+    			String lastName = lastNameField.getText();
+    			String displayName = displayNameField.getText();
+    			String emailAddress = emailAddressField.getText();
+				String emailPassword = emailPasswordField.getText();
+    			String smtpHost = smtpHostField.getText();
+    			String tlsPort = tlsPortField.getText();
+				try {
+					storeInformation();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
+				new Update(firstName, lastName, displayName, emailAddress, emailPassword, smtpHost, tlsPort);
+				JOptionPane.showMessageDialog(null, "Email Setup Saved.");
+				dispose();
+			}
+		}));
+
+		JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+
+		JPanel panel = new JPanel(new GridLayout(8, 2));
+        panel.add(firstNameLabel);
+        panel.add(firstNameField);
+        panel.add(lastNameLabel);
+        panel.add(lastNameField);
+        panel.add(displayNameLabel);
+        panel.add(displayNameField);
+        panel.add(emailAddressLabel);
+        panel.add(emailAddressField);
+		panel.add(passwordLabel);
+        panel.add(emailPasswordField);
+        panel.add(smtpHostLabel);
+        panel.add(smtpHostField);
+        panel.add(tlsPortLabel);
+        panel.add(tlsPortField);
+
+        panel.add(saveButton);
+        panel.add(cancelButton);
+
+        add(panel);
+
+        setTitle("Email Setup");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
+	}
+	public String getDisplayName(){
+		return displayName;
+	}
+}
+
+
 public class AudioGPT {
+	static boolean autologin;
 	public static void main(String[] args) throws Exception {
-		//new AppFrame();
-		new CreateAccountUI();
+		// reading setting file
+		try {
+			File file = new File("credentials.txt");
+			Scanner scanner = new Scanner(file);
+			int number = scanner.nextInt();
+			if (number == 0) {
+				autologin = false;
+			}
+			else {
+				autologin = true;
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found: " + "credentials.txt");
+			e.printStackTrace();
+		}
+		if (autologin) {
+			new AppFrame();
+		}
+		else {
+			new AccountUI();
+		}
 	}
 }
