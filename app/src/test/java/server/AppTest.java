@@ -1,4 +1,4 @@
-package newcsgui;
+package server;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
