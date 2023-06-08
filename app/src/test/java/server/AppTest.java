@@ -143,7 +143,7 @@ public class AppTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(404, response.statusCode());
+        assertEquals(401, response.statusCode());
         assertEquals("Incorrect username or password", response.body());
     }
 
