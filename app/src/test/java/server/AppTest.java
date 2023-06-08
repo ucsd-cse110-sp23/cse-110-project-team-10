@@ -1,4 +1,5 @@
 package server;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -311,12 +312,13 @@ public class AppTest {
         HttpClient client = HttpClient.newHttpClient();
 
         // Set post
-        String requestBody = "{\"username\": \"" + username + "\"}";
+        JSONObject json = new JSONObject();
+        json.put("username", username);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/login"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
