@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="server.AppTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-06-08T06:55:16" hostname="Vincents-MacBook-Air.local" time="5.02">
+<testsuite name="server.AppTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-06-08T07:01:57" hostname="Vincents-MacBook-Air.local" time="4.377">
   <properties/>
-  <testcase name="testCreateAccountEndpoint()" classname="server.AppTest" time="0.318"/>
-  <testcase name="testLoginNonExistingUser()" classname="server.AppTest" time="0.091"/>
-  <testcase name="testLoginExistingUser()" classname="server.AppTest" time="0.165"/>
-  <testcase name="askQuestion()" classname="server.AppTest" time="4.186"/>
+  <testcase name="testCreateAccountEndpoint()" classname="server.AppTest" time="0.714"/>
+  <testcase name="testLoginNonExistingUser()" classname="server.AppTest" time="0.111"/>
+  <testcase name="testLoginExistingUser()" classname="server.AppTest" time="0.081"/>
+  <testcase name="askQuestion()" classname="server.AppTest" time="3.197"/>
   <testcase name="testCreateAccountEndpointExists()" classname="server.AppTest" time="0.079"/>
-  <testcase name="testGetHistoryNonExistingUser()" classname="server.AppTest" time="0.078"/>
-  <testcase name="testGetHistoryExistingUser()" classname="server.AppTest" time="0.098"/>
+  <testcase name="testGetHistoryNonExistingUser()" classname="server.AppTest" time="0.08"/>
+  <testcase name="testGetHistoryExistingUser()" classname="server.AppTest" time="0.113"/>
   <system-out><![CDATA[starting
 Pinged your deployment. You successfully connected to MongoDB!
 Server started on port 3000
@@ -16,7 +16,7 @@ Transcription Result: What is the capital of France?
 Option question
 answer is Paris.
 ]]></system-out>
-  <system-err><![CDATA[Jun 07, 2023 11:55:14 PM com.mongodb.internal.diagnostics.logging.Loggers shouldUseSLF4J
+  <system-err><![CDATA[Jun 08, 2023 12:01:55 AM com.mongodb.internal.diagnostics.logging.Loggers shouldUseSLF4J
 WARNING: SLF4J not found on the classpath.  Logging is disabled for the 'org.mongodb.driver' component
 ]]></system-err>
 </testsuite>

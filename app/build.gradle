@@ -30,6 +30,9 @@ dependencies {
 
     testImplementation 'org.mockito:mockito-core:3.11.2'
     testImplementation 'org.mockito:mockito-junit-jupiter:3.11.2'
+    
+    // Add MockWebServer for testing
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.2'
 }
 
 application {

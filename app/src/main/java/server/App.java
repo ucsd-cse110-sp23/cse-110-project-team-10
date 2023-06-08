@@ -18,8 +18,8 @@ import org.bson.Document;
 public class App {
 
     // initialize server port and hostname
-    private static final int SERVER_PORT = 3000;
-    private static final String SERVER_HOSTNAME = "localhost";
+    private static final int SERVER_PORT = 3001;
+    private static final String SERVER_HOSTNAME = "127.0.0.1";
 
     public static void main(String[] args) throws IOException {
 
