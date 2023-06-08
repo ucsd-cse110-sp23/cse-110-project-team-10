@@ -161,7 +161,8 @@ public class AppTest {
         String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/login"))
+                // .uri(URI.create(BASE_URL + "/login"))
+                .uri(URI.create("http://127.0.0.1:3000/login"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -323,7 +324,7 @@ public class AppTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(400, response.statusCode()); // Assuming server responds with 400 for missing required fields
+        assertEquals(400, response.statusCode()); 
     }
     
     @Test
