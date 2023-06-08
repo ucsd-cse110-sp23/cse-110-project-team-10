@@ -66,7 +66,6 @@ class MockSetUpUI{
 
 public class SetupEmailBDDTests {
     private MockSetUpUI mockSetUpUI;
-    String[] inputs = {"true","test@gmail.com","password","Joseph","Mckenney","Joseph123","joseph@gmail.com","mypassword","12453","277"};
 
     @BeforeEach
     public void setup(){
@@ -75,6 +74,7 @@ public class SetupEmailBDDTests {
 
     @Test
     public void testSetUpEmail() throws IOException{
+	String[] inputs = {"true","test@gmail.com","password","Joseph","Mckenney","Joseph123","joseph@gmail.com","mypassword","12453","277"};
         mockSetUpUI.autologin = inputs[0];
         mockSetUpUI.preEmail = inputs[1];
         mockSetUpUI.prePassword = inputs[2];
