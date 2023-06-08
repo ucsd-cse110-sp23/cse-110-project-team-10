@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="server.AppTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-06-08T16:50:32" hostname="Vincents-MacBook-Air.local" time="5.669">
+<testsuite name="server.AppTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-06-08T17:00:24" hostname="Vincents-MacBook-Air.local" time="3.12">
   <properties/>
-  <testcase name="testCreateAccountEndpoint()" classname="server.AppTest" time="0.459"/>
-  <testcase name="testLoginNonExistingUser()" classname="server.AppTest" time="0.218"/>
-  <testcase name="testLoginExistingUser()" classname="server.AppTest" time="0.149"/>
-  <testcase name="askQuestion()" classname="server.AppTest" time="4.573"/>
-  <testcase name="testCreateAccountEndpointExists()" classname="server.AppTest" time="0.08"/>
-  <testcase name="testGetHistoryNonExistingUser()" classname="server.AppTest" time="0.077"/>
-  <testcase name="testGetHistoryExistingUser()" classname="server.AppTest" time="0.107"/>
+  <testcase name="testCreateAccountEndpoint()" classname="server.AppTest" time="0.237"/>
+  <testcase name="testLoginNonExistingUser()" classname="server.AppTest" time="0.083"/>
+  <testcase name="testLoginExistingUser()" classname="server.AppTest" time="0.085"/>
+  <testcase name="askQuestion()" classname="server.AppTest" time="2.464"/>
+  <testcase name="testCreateAccountEndpointExists()" classname="server.AppTest" time="0.084"/>
+  <testcase name="testGetHistoryNonExistingUser()" classname="server.AppTest" time="0.08"/>
+  <testcase name="testGetHistoryExistingUser()" classname="server.AppTest" time="0.083"/>
   <system-out><![CDATA[starting
 Pinged your deployment. You successfully connected to MongoDB!
 Server started on port 3000
@@ -16,7 +16,7 @@ Transcription Result: What is the capital of France?
 Option question
 answer is Paris.
 ]]></system-out>
-  <system-err><![CDATA[Jun 08, 2023 9:50:30 AM com.mongodb.internal.diagnostics.logging.Loggers shouldUseSLF4J
+  <system-err><![CDATA[Jun 08, 2023 10:00:22 AM com.mongodb.internal.diagnostics.logging.Loggers shouldUseSLF4J
 WARNING: SLF4J not found on the classpath.  Logging is disabled for the 'org.mongodb.driver' component
 ]]></system-err>
 </testsuite>
