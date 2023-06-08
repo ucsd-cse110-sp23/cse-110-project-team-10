@@ -19,27 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import com.sun.net.httpserver.HttpServer;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Base64;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppTest {
     private static final String BASE_URL = "http://127.0.0.1:3001";
@@ -276,6 +256,105 @@ public class AppTest {
             assertEquals(200, 400);
         }
     }
+    @Test
+    public void testLoginExistingUserWrongPassword() throws IOException, InterruptedException {
+        // Use existing user with wrong password
+        String username = "vince";
+        String password = "wrongpass";
+
+        // Create an HTTP client
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Set post
+        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode());
+        assertEquals("Incorrect username or password", response.body());
+    }
+    
+    @Test
+    public void testInvalidJsonPayload() throws IOException, InterruptedException {
+        // Use existing user with wrong password
+        String username = "vince";
+
+        // Create an HTTP client
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Set post
+        String requestBody = "{\"username\": \"" + username + "\""; // Notice the missing ending brace
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(400, response.statusCode()); // Assuming server responds with 400 for invalid JSON
+    }
+
+    @Test
+    public void testMissingRequiredFields() throws IOException, InterruptedException {
+        // Only send username and miss password
+        String username = "vince";
+
+        // Create an HTTP client
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Set post
+        String requestBody = "{\"username\": \"" + username + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(400, response.statusCode()); // Assuming server responds with 400 for missing required fields
+    }
+    
+    @Test
+    public void testServerUnavailability() throws IOException, InterruptedException {
+        // stop server
+        server.stop(0);
+
+        // Use existing user
+        String username = "vince";
+        String password = "pass";
+
+        // Create an HTTP client
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Set post
+        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            assertTrue(e.getMessage().contains("Connection refused")); 
+        }
+
+        // restart server
+        setUp();
+    }
+    
     
 
 }
