@@ -1,96 +1,53 @@
 package gradle;
 
-import java.io.*;
-import java.util.*;
-import java.util.Scanner;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.UUID;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-
-class MockSetUpUI{
-    String autologin;
-	String preEmail;
-	String prePassword;
-	String firstName;
-	String lastName;
-	String displayName;
-	String emailAddress;
-	String emailPassword;
-	String SMTPHost;
-	String TLSPort;
-
-    public MockSetUpUI(){
-        this.autologin = "";
-        this.preEmail = "";
-        this.prePassword = "";
-        this.firstName = "";
-        this.lastName = "";
-        this.displayName = "";
-        this.emailAddress = "";
-        this.emailPassword = "";
-        this.SMTPHost = "";
-        this.TLSPort = "";
-
-
-    }
-    public void storeInformation() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"));
-		String line;
-		if ((line = reader.readLine()) != null){
-			String[] values = line.split(" ");
-			this.autologin = values[0];
-			this.preEmail = values[1];
-			this.prePassword = values[2];
-			this.firstName = values[3];
-			this.lastName = values[4];
-			this.displayName = values[5];
-			this.emailAddress = values[6];
-			this.emailPassword = values[7];
-			this.SMTPHost = values[8];
-			this.TLSPort = values[9];
-		}
-		reader.close();
-
-        new Update(firstName, lastName, displayName, emailAddress, emailPassword, SMTPHost, TLSPort);
-	}
-}
-
-
-public class CreateEmailBDDTests {
-    private MockSetUpUI mockSetUpUI;
-    String[] inputs = {"true","test@gmail.com","password","Joseph","Mckenney","Joseph123","joseph@gmail.com","mypassword","12453","277"};
+class CreateEmailBDDTests {
+    private MockWhisper mockWhisper;
+    private MockChatGPT mockChatGPT;
+    private MainScreen mainScreen;
+    private QuestionHistory questionHistory;
 
     @BeforeEach
-    public void setup(){
-        mockSetUpUI = new MockSetUpUI();
+    public void setup() throws Exception {
+        // Given a MockWhisper set to transcribe "What is the capital of France?"
+        // And a MockChatGPT set to answer "Paris" when asked "What is the capital of France?"
+        mockWhisper = new MockWhisper("Create email to Max. Let's meet at 7 p.m.");
+        mockChatGPT = new MockChatGPT();
+        mockChatGPT.setExpectedAnswer("Create email to Max. Let's meet at 7 p.m.", "Dear Max,I hope you are doing well. Let's meet at 7 p.m. tonight.Best Regards,Barry");
+
+        // And a MainScreen and QuestionHistory initialized with these mocks
+        mainScreen = new MainScreen(mockWhisper, mockChatGPT);
+        questionHistory = new QuestionHistory(mainScreen, mockWhisper, mockChatGPT);
     }
 
     @Test
-    public void testSetUpEmail() throws IOException{
-        mockSetUpUI.autologin = inputs[0];
-        mockSetUpUI.preEmail = inputs[1];
-        mockSetUpUI.prePassword = inputs[2];
-        mockSetUpUI.firstName = inputs[3];
-        mockSetUpUI.lastName = inputs[4];
-        mockSetUpUI.displayName = inputs[5];
-        mockSetUpUI.emailAddress = inputs[6];
-        mockSetUpUI.emailPassword = inputs[7];
-        mockSetUpUI.SMTPHost = inputs[8];
-        mockSetUpUI.TLSPort = inputs[9];
+    public void createNewEmail() throws Exception {
+        Question createCommand = new Question(mockWhisper, UUID.randomUUID());
+        createCommand.setString(mockWhisper.transcribe(""));
 
-        mockSetUpUI.storeInformation();
+        Answer generatedEmail = mainScreen.AskQuestion(createCommand);
 
-        BufferedReader reader = new BufferedReader(new FileReader("credentials.txt"));
-		String line = reader.readLine();
-        assertTrue(line != null);
-	}
+        assertEquals("Create email to Max. Let's meet at 7 p.m. add Best Regards and my name Fill_in_display_name at the end.", createCommand.toString());
 
+        assertEquals("Dear Max,I hope you are doing well. Let's meet at 7 p.m. tonight.Best Regards,Barry" , generatedEmail.toString());
+
+        assertEquals(createCommand, mainScreen.getQuestionOnMain());
+    }
+
+    @Test
+    public void updateEmailtoHistory() throws Exception {
+        Question createCommand = new Question(mockWhisper, UUID.randomUUID());
+        createCommand.setString(mockWhisper.transcribe(""));
+
+        Answer generatedEmail = mainScreen.AskQuestion(createCommand);
+
+        mainScreen.updateHistory(createCommand, generatedEmail, questionHistory);
+
+        assertTrue(questionHistory.answerPanels.containsKey(createCommand));
+        assertEquals(generatedEmail, questionHistory.answerPanels.get(createCommand));
+    }
 }

@@ -73,7 +73,7 @@ public class Update {
                 Document updatedDocument = new Document(email, password)
                     .append("Email", email)
                     .append("Password", password)
-                    .append("Settings", asList(new Document("type", "first name").append("first", firstName),
+                    .append("Settings", asList(new Document("type", "first name").append("first name", firstName),
                                                 new Document("type", "last name").append("last name", lastName),
                                                 new Document("type", "display name").append("display name", displayName),
                                                 new Document("type", "email address").append("email address", emailAddress),
