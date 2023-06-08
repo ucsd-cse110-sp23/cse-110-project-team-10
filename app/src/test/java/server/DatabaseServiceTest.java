@@ -1,4 +1,4 @@
-package _MS2Demo;
+package server;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
