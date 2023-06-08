@@ -389,7 +389,7 @@ public class RequestHandle implements HttpHandler {
 
                
                     System.out.println("answer is "+userAnswer);
-                    handleReturn(httpExchange, 200, "QUESTION:"+userAnswer);
+                    handleReturn(httpExchange, 200, "QUESTION:"+response+"%$%"+userAnswer);
                 }
 
                 else{
