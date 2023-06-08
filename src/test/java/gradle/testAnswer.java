@@ -30,6 +30,9 @@ class MockChatGPT extends ChatGPT {
         if (exceptionQuestions.containsKey(question)) {
             throw exceptionQuestions.get(question);
         }
+        if (question.contains("Create email")) {
+            return expectedAnswers.getOrDefault(question, "Dear Max,I hope you are doing well. Let's meet at 7 p.m. tonight.Best Regards,Barry");
+        }
         return expectedAnswers.getOrDefault(question, "");
     }
 }

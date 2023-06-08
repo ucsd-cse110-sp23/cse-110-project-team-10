@@ -95,7 +95,7 @@ public class CreateAccountBDDTests {
     @Test
     public void testCreateAccount() throws Exception{
         long size = userCollection.countDocuments();
-        mockCreateAccountUI.setEmailField("joseph@gmail.com");
+        mockCreateAccountUI.setEmailField("testCreate@gmail.com");
         mockCreateAccountUI.setPasswordField("password");
         mockCreateAccountUI.setVerifyPasswordField("password");
         mockCreateAccountUI.createAccount();
