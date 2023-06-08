@@ -225,7 +225,7 @@ public class AppTest {
         String password = "pass";
     
         String audioData = "";
-        String filePath = "whatIsTheCapitalOfFrance.txt";
+        String filePath = "./src/test/resources/whatIsTheCapitalOfFrance.txt";
     
         try {
             System.out.println("Current directory: " + System.getProperty("user.dir"));
