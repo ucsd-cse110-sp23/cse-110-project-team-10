@@ -17,8 +17,13 @@ public class EmailService {
         }
     }
 
-    public EmailService(String senderEmail, String password, String SMTPHost, String TLSPort) {
+    // Default constructor
+    public EmailService() {
+    }
+
+    public void initialize(String senderEmail, String password, String SMTPHost, String TLSPort) {
         this.senderEmail = senderEmail;
+
         // Set Properties
         Properties props = new Properties();
 
@@ -43,6 +48,10 @@ public class EmailService {
     }
 
     public void sendEmail(String to, String subject, String content) throws SendEmailException {
+        if (this.session == null || this.senderEmail == null) {
+            throw new IllegalStateException("EmailService not initialized");
+        }
+
         try {
             MimeMessage message = new MimeMessage(this.session);
 

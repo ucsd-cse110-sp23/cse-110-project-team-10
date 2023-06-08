@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class RequestHandler {
+public class RequestHandler implements HttpHandler{
     private final UserService userService;
     private final EmailService emailService;
     private final AudioService audioService;
@@ -189,7 +189,10 @@ public class RequestHandler {
                     String subject = audioService.getEmailSubject(response);
 
                     try {
-                        emailService.sendEmail(recipient, subject, message);
+                        // Create a new instance of the EmailService
+                        EmailService dynamicEmailService = new EmailService();
+                        dynamicEmailService.initialize(emailAddress, emailPassword, smtp, tls);
+                        dynamicEmailService.sendEmail(recipient, subject, message);
 
                         Document newHistoryItem = new Document();
                         newHistoryItem.put("action", "email");
@@ -244,10 +247,5 @@ public class RequestHandler {
                 handleReturn(httpExchange, 400, "Invalid JSON");
             }
         }
-
-
-        
-
-    }
-    
+    } 
 }
