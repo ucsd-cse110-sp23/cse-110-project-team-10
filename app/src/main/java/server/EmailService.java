@@ -1,4 +1,4 @@
-package _MS2Demo;
+package server;
 
 import java.util.Properties;
 import javax.mail.*;
