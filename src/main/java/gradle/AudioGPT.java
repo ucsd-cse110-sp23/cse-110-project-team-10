@@ -138,7 +138,6 @@ class MainScreen extends JPanel {
 	Whisper whisper;
 	ChatGPT chatgpt;
 	String displayName;
-	Answer newAnswer;
 
 	public MainScreen(Whisper whisper, ChatGPT chatgpt) throws Exception {
 		UUID questionId = UUID.randomUUID();
@@ -174,6 +173,7 @@ class MainScreen extends JPanel {
 
 	public Answer AskQuestion(Question newQuestion) throws Exception {
 		Answer newAnswer = new Answer(chatgpt);
+		
 		newQuestion.updateContent();
 
 		//create email case
