@@ -1,4 +1,4 @@
-package _MS2Demo;
+package server;
 
 import com.mongodb.client.*;
 
