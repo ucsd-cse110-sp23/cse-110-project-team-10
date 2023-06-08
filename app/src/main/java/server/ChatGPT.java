@@ -1,4 +1,4 @@
-package server;
+package _MS2Demo;
 
 import java.net.URI;
 import java.net.http.HttpClient;
