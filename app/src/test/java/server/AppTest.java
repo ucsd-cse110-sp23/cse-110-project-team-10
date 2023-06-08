@@ -1,4 +1,4 @@
-package server;
+package newcsgui;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,28 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import com.sun.net.httpserver.HttpServer;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,50 +54,70 @@ public class AppTest {
 
     @Test
     public void testCreateAccountEndpoint() throws IOException, InterruptedException {
-
+    
         // Generate a random username and password
         String username = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
-
+    
+        // Additional attributes
+        String emailAddress = "test@example.com";
+        String emailPassword = "emailPass";
+        String smtp = "smtp.example.com";
+        String tls = "2059";
+        String firstName = "Test";
+        String lastName = "User";
+    
         // Create an HTTP client
         HttpClient client = HttpClient.newHttpClient();
-
+    
         // Set post
-        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
+        String requestBody = String.format("{\"username\": \"%s\", \"password\": \"%s\", \"emailAddress\": \"%s\", \"emailPassword\": \"%s\", \"smtp\": \"%s\", \"tls\": \"%s\", \"firstName\": \"%s\", \"lastName\": \"%s\"}",
+        		username, password, emailAddress, emailPassword, smtp, tls, firstName, lastName);
 
+    
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/createAccount"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
-
+    
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+    
         assertEquals(200, response.statusCode());
         assertEquals("User created successfully", response.body());
     }
-
+    
     @Test
     public void testCreateAccountEndpointExists() throws IOException, InterruptedException {
-
+    
         // Use existing user
         String username = "vince";
         String password = "pass";
-
+    
+        // Additional attributes
+        String emailAddress = "vince@example.com";
+        String emailPassword = "emailPass";
+        String smtp = "smtp.example.com";
+        String tls = "2059";
+        String firstName = "Vince";
+        String lastName = "User";
+    
         // Create an HTTP client
         HttpClient client = HttpClient.newHttpClient();
-
+    
         // Set post
-        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
+        String requestBody = String.format("{\"username\": \"%s\", \"password\": \"%s\", \"emailAddress\": \"%s\", \"emailPassword\": \"%s\", \"smtp\": \"%s\", \"tls\": \"%s\", \"firstName\": \"%s\", \"lastName\": \"%s\"}",
+        		username, password, emailAddress, emailPassword, smtp, tls, firstName, lastName);
 
+    
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/createAccount"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
-
+    
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+    
         assertEquals(401, response.statusCode());
         assertEquals("Username already exists", response.body());
     }
@@ -143,7 +142,7 @@ public class AppTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(401, response.statusCode());
+        assertEquals(404, response.statusCode());
         assertEquals("Incorrect username or password", response.body());
     }
 
@@ -225,7 +224,7 @@ public class AppTest {
         String password = "pass";
     
         String audioData = "";
-        String filePath = "./src/test/resources/whatIsTheCapitalOfFrance.txt";
+        String filePath = "/Users/jierubai/eclipse-workspace/MS2Demo/lib/whatIsTheCapitalOfFrance.txt";
     
         try {
             System.out.println("Current directory: " + System.getProperty("user.dir"));
