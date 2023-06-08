@@ -163,12 +163,27 @@ public class App {
                         answerLabel.setText("Answer: " + answer);
                     }
 
-                    else if (command.equals("")) {
+                    else if (command.equals("email")) {
+
+                        questionLabel.setText("Email sent: ");
+                        answerLabel.setText("message: " + responseArr[1]);
+                    }
+
+                    else if (command.equals("delete all")) {
+
+                        questionLabel.setText("Deleted all history ");
+                        answerLabel.setText("");
 
                     }
 
-                    else {
+                    else if (command.equals("delete this")) {
+                        questionLabel.setText("delted single entry");
+                        answerLabel.setText("");
+                    }
 
+                    else {
+                        questionLabel.setText("unknown command");
+                        answerLabel.setText("");
                     }
 
                 }
@@ -269,7 +284,8 @@ public class App {
         String username = creds[1];
         String password = creds[2];
         
-
+        System.out.println(username);
+        System.out.println(password);
         try {
             // Create the URL object for the POST request
             URL url = new URL("http://127.0.0.1:3000/getHistory");
@@ -450,6 +466,15 @@ public class App {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+            } else{
+                try (FileWriter fileWriter = new FileWriter(CRED_FILE)) {
+                    String credentials = "0," + usernameField.getText() + "," + new String(passwordField.getPassword());
+                    fileWriter.write(credentials);
+
+                    // updateHistoryFile();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
 
 
@@ -579,6 +604,15 @@ public class App {
                     // Write credentials to file
                     try (FileWriter fileWriter = new FileWriter(CRED_FILE)) {
                         String credentials = "1," + usernameField.getText() + ","
+                                + new String(passwordField.getPassword());
+                        fileWriter.write(credentials);
+                        // updateHistoryFile();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                } else{
+                    try (FileWriter fileWriter = new FileWriter(CRED_FILE)) {
+                        String credentials = "0," + usernameField.getText() + ","
                                 + new String(passwordField.getPassword());
                         fileWriter.write(credentials);
                         // updateHistoryFile();
