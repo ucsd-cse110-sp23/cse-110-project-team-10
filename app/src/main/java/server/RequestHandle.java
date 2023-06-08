@@ -48,7 +48,7 @@ public class RequestHandle implements HttpHandler {
 
         // logging if server chokes on sending
         catch (Exception e) {
-            System.out.println("error hadle return");
+            System.out.println("error hadling return");
         }
     }
 
@@ -203,11 +203,20 @@ public class RequestHandle implements HttpHandler {
         }
 
         if (endpoint.equals("/preformLogic")) {
+
+
             try {
                 JSONObject postJson = new JSONObject(postData);
                 String username = postJson.getString("username");
                 String password = postJson.getString("password");
                 String audioData = postJson.getString("audioData");
+                String emailAddress = postJson.getString("emailAddress");
+                String emailPassword = postJson.getString("emailPassword");
+                String smtp = postJson.getString("smtp");
+                String tls = postJson.getString("tls");
+                String firstName = postJson.getString("firstName");
+                String lastName = postJson.getString("lastName");
+                String selected = postJson.getString("selected");
 
                 // get database and collection
                 MongoDatabase database = mongoClient.getDatabase("users");
@@ -253,14 +262,18 @@ public class RequestHandle implements HttpHandler {
                 System.out.println("Option " + userOption);
 
                 //create history to enter
-                JSONObject innerData = new JSONObject();
-                JSONObject jsonObject = new JSONObject();
-      
-        
 
-                if (userOption.equals("email")) {
+                //{id: "", command: "", data:{question: "", response: ""}}
+                JSONObject historyJSON = new JSONObject();
+                
+                //{question: "", response: ""}
+                JSONObject conversationJSON = new JSONObject();
 
-                    jsonObject.put("command", "email");
+                List<Document> history = (List<Document>) user.get("history");
+                int id;
+
+
+                if (userOption.equals("send email")) {
 
                     String message = "";
                     message = chatGPT.getAnswer("what is the message they want to send in the email, say only that message exactly and nothing else: " + response, 0.4, 16);
@@ -268,24 +281,36 @@ public class RequestHandle implements HttpHandler {
                     String sender = "";
                     sender = chatGPT.getAnswer("What is the email in "+response, 0.4, 16);
 
-                    System.out.println("emailing "+message+" to "+sender);
+                    String subject = "";
+                    subject = chatGPT.getAnswer("What is the subject in "+response, 0.4, 16);
 
-                    innerData.put("email", "emailing "+message+" to "+sender);
-                    jsonObject.put("data", innerData.toString());
-                
-                    // get the history of the user
-                    List<Document> history = (List<Document>) user.get("history");
-                
-                    // if history is empty, set id as 0, otherwise set it as the size of history (which is the next index)
-                    int id = history.isEmpty() ? 0 : history.size();
-                
-                    jsonObject.put("id", id);
-                
-                    // add new action to the user's history
-                    history.add(Document.parse(jsonObject.toString()));
-                
-                    // update the user's history in the database
-                    collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+                    //sending email here
+                    message = message.trim();
+                    sender = sender.trim();
+                    subject = subject.trim();
+
+                    try{
+                        new SendEmail(emailAddress, emailPassword, firstName+ " "+lastName, smtp, tls, sender, subject, message);
+
+                        id = history.isEmpty() ? 0 : history.size();
+                        historyJSON.put("id",id);
+                        historyJSON.put("command", "email");
+    
+                        conversationJSON.put("question", response);
+                        conversationJSON.put("response", "sent");
+    
+                        historyJSON.put("data", conversationJSON.toString());
+                        history.add(Document.parse(historyJSON.toString()));
+        
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+
+                        handleReturn(httpExchange, 200, "EMAIL: email sent");
+                    } 
+                    
+                    catch(Exception e){
+                        handleReturn(httpExchange, 500, "email send fail");
+                    }
+
                 }
 
                 else if (userOption.equals("delete all")) {
@@ -298,22 +323,73 @@ public class RequestHandle implements HttpHandler {
                         collection.updateOne(Filters.eq("username", username),
                                             Updates.set("history", new ArrayList<>()));
 
-                        handleReturn(httpExchange, 200, "OK: delete all");
+                        handleReturn(httpExchange, 200, "DELETE ALL: deleted all items");
                     } 
                     else {
                         handleReturn(httpExchange, 500, "User does not exist");
                     }
                 }
 
+
                 else if (userOption.equals("delete this")) {
+                    try {
+                        int itemIdToDelete = Integer.parseInt(selected);
+                        if (itemIdToDelete < 0 || itemIdToDelete >= history.size()) {
+                            handleReturn(httpExchange, 400, "Invalid item ID");
+                            return;
+                        }
+                
+                        history.remove(itemIdToDelete);
+                
+                        // update IDs for each remaining document in history
+                        for (int i = 0; i < history.size(); i++) {
+                            Document doc = history.get(i);
+                            doc.put("id", i);
+                        }
+                
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
 
-                    try{
-                        String historyID = postJson.getString("historyID");
-
-
-                    }catch (JSONException e) {
-                        handleReturn(httpExchange, 400, "Invalid JSON getting history to delte");
+                        id = history.isEmpty() ? 0 : history.size();
+                        historyJSON.put("id",id);
+                        historyJSON.put("command", "delete this");
+    
+                        conversationJSON.put("question", response);
+                        conversationJSON.put("response", "deleting one item under id "+selected);
+    
+                        historyJSON.put("data", conversationJSON.toString());
+                        history.add(Document.parse(historyJSON.toString()));
+        
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+                
+                        handleReturn(httpExchange, 200, "DELETE THIS: deleted one item");
+                
+                    } catch (JSONException e) {
+                        handleReturn(httpExchange, 400, "Invalid JSON getting history to delete");
                     }
+                }
+                
+
+                else if(userOption.equals("question")){
+    
+                    String userAnswer = chatGPT.getAnswer(response, 0, 16);
+
+                    userAnswer = userAnswer.trim();
+
+                    id = history.isEmpty() ? 0 : history.size();
+                    historyJSON.put("id",id);
+                    historyJSON.put("command", "question");
+
+                    conversationJSON.put("question", response);
+                    conversationJSON.put("response", userAnswer);
+
+                    historyJSON.put("data", conversationJSON.toString());
+                    history.add(Document.parse(historyJSON.toString()));
+    
+                    collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+
+               
+                    System.out.println("answer is "+userAnswer);
+                    handleReturn(httpExchange, 200, "QUESTION:"+userAnswer);
                 }
 
                 else{
