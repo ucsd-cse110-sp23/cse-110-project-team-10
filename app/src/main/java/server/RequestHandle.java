@@ -241,9 +241,9 @@ public class RequestHandle implements HttpHandler {
                                 + " respond with either 'send email' 'delete this' 'delete all' or 'question'",
                         0, 16);
 
-                userOption = userOption.trim();
+                userOption = userOption.toLowerCase().trim();
 
-                System.out.println("THE USER CHOSE " + userOption);
+                System.out.println("Option " + userOption);
 
                 if (userOption.equals("email")) {
 
@@ -257,7 +257,8 @@ public class RequestHandle implements HttpHandler {
                     handleReturn(httpExchange, 200, "OK: email");
                 }
 
-                if (userOption.equals("delete all")) {
+                else if (userOption.equals("delete all")) {
+
                    
                     Document localUser = collection.find(Filters.eq("username", username)).first();
 
@@ -273,8 +274,12 @@ public class RequestHandle implements HttpHandler {
                     }
                 }
 
-                if (userOption.equals("delete this")) {
+                else if (userOption.equals("delete this")) {
                     handleReturn(httpExchange, 200, "OK: delete this");
+                }
+
+                else{
+                    handleReturn(httpExchange, 400, "Unknown command");
                 }
 
             } catch (JSONException e) {
