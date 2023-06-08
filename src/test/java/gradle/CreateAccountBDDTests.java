@@ -29,7 +29,6 @@ import java.awt.*;
 // import java.awt.desktop.QuitEvent;
 import java.io.*;
 import java.util.*;
-import java.util.Random;
 
 class MockCreateAccountUI{
     private String emailField;
@@ -76,8 +75,6 @@ class MockCreateAccountUI{
 }
 public class CreateAccountBDDTests {
     private MockCreateAccountUI mockCreateAccountUI;
-    String rdmString;
-    Random rand;
 
     
     String uri = "mongodb+srv://haz042:Dan13697748680@lab7.nxlm4ex.mongodb.net/?retryWrites=true&w=majority";
@@ -93,16 +90,14 @@ public class CreateAccountBDDTests {
     @BeforeEach
 	public void setup() throws Exception {
 		mockCreateAccountUI = new MockCreateAccountUI();
-        rand = new Random();
 	}
 
     @Test
     public void testCreateAccount() throws Exception{
-        rdmString = String.valueOf(rand.ints(8));
         long size = userCollection.countDocuments();
-        mockCreateAccountUI.setEmailField(rdmString + "@gmail.com");
-        mockCreateAccountUI.setPasswordField(rdmString);
-        mockCreateAccountUI.setVerifyPasswordField(rdmString);
+        mockCreateAccountUI.setEmailField("joseph@gmail.com");
+        mockCreateAccountUI.setPasswordField("password");
+        mockCreateAccountUI.setVerifyPasswordField("password");
         mockCreateAccountUI.createAccount();
         
         assertEquals(size+1,userCollection.countDocuments());
