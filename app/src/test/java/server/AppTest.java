@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class AppTest {
-    private static final String BASE_URL = "http://127.0.0.1:3001";
+    private static final String BASE_URL = "http://127.0.0.1:3000";
     private static HttpServer server;
     private static ExecutorService executor;
 

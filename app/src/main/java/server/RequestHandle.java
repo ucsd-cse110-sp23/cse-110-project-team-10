@@ -87,6 +87,12 @@ public class RequestHandle implements HttpHandler {
                 JSONObject postJson = new JSONObject(postData);
                 String username = postJson.getString("username");
                 String password = postJson.getString("password");
+                String emailAddress = postJson.getString("emailAddress");
+                String emailPassword = postJson.getString("emailPassword");
+                String smtp = postJson.getString("smtp");
+                String tls = postJson.getString("tls");
+                String firstName = postJson.getString("firstName");
+                String lastName = postJson.getString("lastName");
 
                 // get database and collection
                 MongoDatabase database = mongoClient.getDatabase("users");
@@ -106,12 +112,12 @@ public class RequestHandle implements HttpHandler {
                 newUser.append("username", username)
                         .append("password", password)
                         .append("history", new ArrayList<>())
-                        .append("email address", "")
-                        .append("email password", "")
-                        .append("SMTP", "")
-                        .append("TLS", "")
-                        .append("first name", "")
-                        .append("last name", "");
+                        .append("email address", emailAddress)
+                        .append("email password", emailPassword)
+                        .append("SMTP", smtp)
+                        .append("TLS", tls)
+                        .append("first name", firstName)
+                        .append("last name", lastName);
 
                 // add new user to the database
                 collection.insertOne(newUser);
@@ -210,13 +216,14 @@ public class RequestHandle implements HttpHandler {
                 String username = postJson.getString("username");
                 String password = postJson.getString("password");
                 String audioData = postJson.getString("audioData");
-                String emailAddress = postJson.getString("emailAddress");
-                String emailPassword = postJson.getString("emailPassword");
-                String smtp = postJson.getString("smtp");
-                String tls = postJson.getString("tls");
-                String firstName = postJson.getString("firstName");
-                String lastName = postJson.getString("lastName");
                 String selected = postJson.getString("selected");
+
+                String emailAddress;
+                String emailPassword;
+                String smtp;
+                String tls;
+                String firstName;
+                String lastName;
 
                 // get database and collection
                 MongoDatabase database = mongoClient.getDatabase("users");
@@ -237,6 +244,13 @@ public class RequestHandle implements HttpHandler {
                     scanner.close();
                     return;
                 }
+
+                emailAddress = user.getString("emailAddress");
+                emailPassword = user.getString("emailPassword");
+                smtp = user.getString("smtp");
+                tls = user.getString("tls");
+                firstName = user.getString("firstName");
+                lastName = user.getString("lastName");
 
                 // decode base64 string to bytes
                 byte[] audioBytes = Base64.getDecoder().decode(audioData);
