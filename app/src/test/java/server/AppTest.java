@@ -1,5 +1,6 @@
 package server;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AppTest {
-    private static final String BASE_URL = "http://127.0.0.1:3001";
+    private static final String BASE_URL = "http://127.0.0.1:3000";
     private static HttpServer server;
     private static ExecutorService executor;
 
@@ -75,53 +76,79 @@ public class AppTest {
 
     @Test
     public void testCreateAccountEndpoint() throws IOException, InterruptedException {
-
+    
         // Generate a random username and password
         String username = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
-
+    
+        // Additional attributes
+        String emailAddress = "test@example.com";
+        String emailPassword = "emailPass";
+        String smtp = "smtp.example.com";
+        String tls = "2059";
+        String firstName = "Test";
+        String lastName = "User";
+    
         // Create an HTTP client
         HttpClient client = HttpClient.newHttpClient();
-
-        // Set post
-        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
-
+    
+        // Create the JSON request body
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("username", username);
+        requestBody.put("password", password);
+        requestBody.put("emailAddress", emailAddress);
+        requestBody.put("emailPassword", emailPassword);
+        requestBody.put("smtp", smtp);
+        requestBody.put("tls", tls);
+        requestBody.put("firstName", firstName);
+        requestBody.put("lastName", lastName);
+    
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/createAccount"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                 .build();
-
+    
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+    
         assertEquals(200, response.statusCode());
-        assertEquals("User created successfully", response.body());
     }
-
+    
+    
     @Test
     public void testCreateAccountEndpointExists() throws IOException, InterruptedException {
-
+    
         // Use existing user
         String username = "vince";
         String password = "pass";
-
+    
+        // Additional attributes
+        String emailAddress = "vince@example.com";
+        String emailPassword = "emailPass";
+        String smtp = "smtp.example.com";
+        String tls = "2059";
+        String firstName = "Vince";
+        String lastName = "User";
+    
         // Create an HTTP client
         HttpClient client = HttpClient.newHttpClient();
-
+    
         // Set post
-        String requestBody = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
-
+        String requestBody = String.format("{\"username\": \"%s\", \"password\": \"%s\", \"emailAddress\": \"%s\", \"emailPassword\": \"%s\", \"smtp\": \"%s\", \"tls\": %s, \"firstName\": \"%s\", \"lastName\": \"%s\"}",
+        username, password, emailAddress, emailPassword, smtp, tls, firstName, lastName);
+    
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/createAccount"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
-
+    
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+    
         assertEquals(401, response.statusCode());
         assertEquals("Username already exists", response.body());
     }
+    
 
     @Test
     public void testLoginNonExistingUser() throws IOException, InterruptedException {

@@ -90,16 +90,47 @@ public class RequestHandler implements HttpHandler{
                 JSONObject postJson = new JSONObject(postData);
                 String username = postJson.getString("username");
                 String password = postJson.getString("password");
+                String emailAddress = postJson.getString("emailAddress");
+                String emailPassword = postJson.getString("emailPassword");
+                String smtp = postJson.getString("smtp");
+                String tls = postJson.getString("tls");
+                String firstName = postJson.getString("firstName");
+                String lastName = postJson.getString("lastName");
+
+                // get database and collection
+                MongoDatabase database = mongoClient.getDatabase("users");
+                MongoCollection<Document> collection = database.getCollection("users");
+
+                // check if user already exists
+                Document existingUser = collection.find(Filters.eq("username", username)).first();
+                if (existingUser != null) {
+                    handleReturn(httpExchange, 401, "Username already exists");
+
+                    scanner.close();
+                    return;
+                }
 
                 // create new user
-                Document newUser = userService.createUser(username, password);
-                if (newUser == null) {
-                    handleReturn(httpExchange, 401, "Username already exists");
-                } else {
-                    handleReturn(httpExchange, 200, "User created successfully");
-                }
+                Document newUser = new Document("_id", new ObjectId());
+                newUser.append("username", username)
+                        .append("password", password)
+                        .append("history", new ArrayList<>())
+                        .append("email address", emailAddress)
+                        .append("email password", emailPassword)
+                        .append("SMTP", smtp)
+                        .append("TLS", tls)
+                        .append("first name", firstName)
+                        .append("last name", lastName);
+
+                // add new user to the database
+                collection.insertOne(newUser);
+
+                handleReturn(httpExchange, 200, "User created successfully");
+
             } catch (JSONException e) {
                 handleReturn(httpExchange, 400, "Invalid JSON in request");
+            } catch (MongoException e) {
+                handleReturn(httpExchange, 500, "Server error");
             }
         }
 
@@ -146,106 +177,214 @@ public class RequestHandler implements HttpHandler{
             }
         }
         if (endpoint.equals("/preformLogic")) {
+
+
             try {
                 JSONObject postJson = new JSONObject(postData);
                 String username = postJson.getString("username");
                 String password = postJson.getString("password");
                 String audioData = postJson.getString("audioData");
-                String emailAddress = postJson.getString("emailAddress");
-                String emailPassword = postJson.getString("emailPassword");
-                String smtp = postJson.getString("smtp");
-                String tls = postJson.getString("tls");
-                String firstName = postJson.getString("firstName");
-                String lastName = postJson.getString("lastName");
                 String selected = postJson.getString("selected");
 
-                // Check if the user exists and the password matches
-                Document user = userService.loginUser(username, password);
+                String emailAddress;
+                String emailPassword;
+                String smtp;
+                String tls;
+                String firstName;
+                String lastName;
+
+                // get database and collection
+                MongoDatabase database = mongoClient.getDatabase("users");
+                MongoCollection<Document> collection = database.getCollection("users");
+
+                // try to find the user
+                Document user = collection.find(Filters.eq("username", username)).first();
                 if (user == null) {
-                    handleReturn(httpExchange, 404, "User not found or incorrect password");
+                    handleReturn(httpExchange, 404, "User not found");
                     scanner.close();
                     return;
                 }
 
+                // check if passwords match
+                String storedPassword = user.getString("password");
+                if (!storedPassword.equals(password)) {
+                    handleReturn(httpExchange, 401, "Incorrect password");
+                    scanner.close();
+                    return;
+                }
+
+                emailAddress = user.getString("emailAddress");
+                emailPassword = user.getString("emailPassword");
+                smtp = user.getString("smtp");
+                tls = user.getString("tls");
+                firstName = user.getString("firstName");
+                lastName = user.getString("lastName");
+
+
                 // decode base64 string to bytes
                 byte[] audioBytes = Base64.getDecoder().decode(audioData);
 
-                // Transcribe audio to text
-                String response = audioService.transcribeAudio(audioBytes);
+                // specify file path
+                String filePath = "file.wav";
 
-                // Determine user's option
-                String userOption = audioService.determineUserOption(response);
+                // write bytes to file
+                Files.write(Paths.get(filePath), audioBytes, StandardOpenOption.CREATE);
 
-                // Prepare for the history update
-                JSONArray history = userService.getUserHistory(username, password);
-                List<Document> historyList = new ArrayList<>();
-                for (int i = 0; i < history.length(); i++) {
-                    historyList.add((Document) history.get(i));
-                }
+                Whisper whisper = new Whisper();
+                String response = whisper.transcribe("file.wav");
+
+                ChatGPT chatGPT = new ChatGPT();
+                String userOption = chatGPT.getAnswer(
+                        "From the following text does it seem like the user wants to send email, delete this occurence, delete all of something, or ask a general question:"
+                                + response
+                                + " respond with either 'send email' 'delete this' 'delete all' or 'question'",
+                        0, 16);
+
+                userOption = userOption.toLowerCase().trim();
+
+                System.out.println("Option " + userOption);
+
+                //create history to enter
+
+                //{id: "", command: "", data:{question: "", response: ""}}
+                JSONObject historyJSON = new JSONObject();
+                
+                //{question: "", response: ""}
+                JSONObject conversationJSON = new JSONObject();
+
+                List<Document> history = (List<Document>) user.get("history");
+                int id;
+
 
                 if (userOption.equals("send email")) {
-                    String message = audioService.getEmailMessage(response);
-                    String recipient = audioService.getEmailRecipient(response);
-                    String subject = audioService.getEmailSubject(response);
 
-                    try {
-                        // Create a new instance of the EmailService
-                        EmailService dynamicEmailService = new EmailService();
-                        dynamicEmailService.initialize(emailAddress, emailPassword, smtp, tls);
-                        dynamicEmailService.sendEmail(recipient, subject, message);
+                    String message = "";
+                    message = chatGPT.getAnswer("what is the message they want to send in the email, say only that message exactly and nothing else: " + response, 0.4, 16);
 
-                        Document newHistoryItem = new Document();
-                        newHistoryItem.put("action", "email");
-                        newHistoryItem.put("transcript", response);
-                        newHistoryItem.put("status", "sent");
-                        historyList.add(newHistoryItem);
-                        userService.updateUserHistory(username, password, historyList);
+                    String sender = "";
+                    sender = chatGPT.getAnswer("What is the email in "+response, 0.4, 16);
+
+                    String subject = "";
+                    subject = chatGPT.getAnswer("What is the subject in "+response, 0.4, 16);
+
+                    //sending email here
+                    message = message.trim();
+                    sender = sender.trim();
+                    subject = subject.trim();
+
+                    try{
+                        new SendEmail(emailAddress, emailPassword, firstName+ " "+lastName, smtp, tls, sender, subject, message);
+
+                        id = history.isEmpty() ? 0 : history.size();
+                        historyJSON.put("id",id);
+                        historyJSON.put("command", "email");
+    
+                        conversationJSON.put("question", response);
+                        conversationJSON.put("response", "sent");
+    
+                        historyJSON.put("data", conversationJSON.toString());
+                        history.add(Document.parse(historyJSON.toString()));
+        
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
 
                         handleReturn(httpExchange, 200, "EMAIL: email sent");
-                    }
+                    } 
+                    
                     catch(Exception e){
                         handleReturn(httpExchange, 500, "email send fail");
                     }
+
                 }
+
                 else if (userOption.equals("delete all")) {
-                    userService.clearUserHistory(username, password);
-                    handleReturn(httpExchange, 200, "DELETE ALL: deleted all items");
+
+                   
+                    Document localUser = collection.find(Filters.eq("username", username)).first();
+
+                    
+                    if (localUser != null) {
+                        collection.updateOne(Filters.eq("username", username),
+                                            Updates.set("history", new ArrayList<>()));
+
+                        handleReturn(httpExchange, 200, "DELETE ALL: deleted all items");
+                    } 
+                    else {
+                        handleReturn(httpExchange, 500, "User does not exist");
+                    }
                 }
+
+
                 else if (userOption.equals("delete this")) {
                     try {
                         int itemIdToDelete = Integer.parseInt(selected);
-                        if (itemIdToDelete < 0 || itemIdToDelete >= historyList.size()) {
+                        if (itemIdToDelete < 0 || itemIdToDelete >= history.size()) {
                             handleReturn(httpExchange, 400, "Invalid item ID");
                             return;
                         }
+                
+                        history.remove(itemIdToDelete);
+                
+                        // update IDs for each remaining document in history
+                        for (int i = 0; i < history.size(); i++) {
+                            Document doc = history.get(i);
+                            doc.put("id", i);
+                        }
+                
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
 
-                        historyList.remove(itemIdToDelete);
-                        userService.updateUserHistory(username, password, historyList);
-
+                        id = history.isEmpty() ? 0 : history.size();
+                        historyJSON.put("id",id);
+                        historyJSON.put("command", "delete this");
+    
+                        conversationJSON.put("question", response);
+                        conversationJSON.put("response", "deleting one item under id "+selected);
+    
+                        historyJSON.put("data", conversationJSON.toString());
+                        history.add(Document.parse(historyJSON.toString()));
+        
+                        collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+                
                         handleReturn(httpExchange, 200, "DELETE THIS: deleted one item");
-                    }
-                    catch (JSONException e) {
+                
+                    } catch (JSONException e) {
                         handleReturn(httpExchange, 400, "Invalid JSON getting history to delete");
                     }
                 }
+                
+
                 else if(userOption.equals("question")){
-                    String userAnswer = audioService.getAnswer(response);
+    
+                    String userAnswer = chatGPT.getAnswer(response, 0, 16);
 
-                    Document newHistoryItem = new Document();
-                    newHistoryItem.put("action", "question");
-                    newHistoryItem.put("transcript", response);
-                    newHistoryItem.put("answer", userAnswer);
-                    historyList.add(newHistoryItem);
-                    userService.updateUserHistory(username, password, historyList);
+                    userAnswer = userAnswer.trim();
 
-                    handleReturn(httpExchange, 200, "QUESTION: " + userAnswer);
-                } 
-                else {
-                    handleReturn(httpExchange, 400, "Invalid user option");
+                    id = history.isEmpty() ? 0 : history.size();
+                    historyJSON.put("id",id);
+                    historyJSON.put("command", "question");
+
+                    conversationJSON.put("question", response);
+                    conversationJSON.put("response", userAnswer);
+
+                    historyJSON.put("data", conversationJSON.toString());
+                    history.add(Document.parse(historyJSON.toString()));
+    
+                    collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
+
+               
+                    System.out.println("answer is "+userAnswer);
+                    handleReturn(httpExchange, 200, "QUESTION:"+response+"%$%"+userAnswer);
                 }
+
+                else{
+                    handleReturn(httpExchange, 400, "Unknown command");
+                }
+
             } catch (JSONException e) {
-                handleReturn(httpExchange, 400, "Invalid JSON");
+                handleReturn(httpExchange, 400, "Invalid JSON in request");
+            } catch (MongoException e) {
+                handleReturn(httpExchange, 500, "Server error");
             }
         }
-    } 
+
+    }
 }
