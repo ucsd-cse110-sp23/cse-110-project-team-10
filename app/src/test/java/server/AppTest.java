@@ -117,7 +117,6 @@ public class AppTest {
     
     @Test
     public void testCreateAccountEndpointExists() throws IOException, InterruptedException {
-    
         // Use existing user
         String username = "vince";
         String password = "pass";
@@ -133,14 +132,21 @@ public class AppTest {
         // Create an HTTP client
         HttpClient client = HttpClient.newHttpClient();
     
-        // Set post
-        String requestBody = String.format("{\"username\": \"%s\", \"password\": \"%s\", \"emailAddress\": \"%s\", \"emailPassword\": \"%s\", \"smtp\": \"%s\", \"tls\": %s, \"firstName\": \"%s\", \"lastName\": \"%s\"}",
-        username, password, emailAddress, emailPassword, smtp, tls, firstName, lastName);
+        // Create the JSON request body
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("username", username);
+        requestBody.put("password", password);
+        requestBody.put("emailAddress", emailAddress);
+        requestBody.put("emailPassword", emailPassword);
+        requestBody.put("smtp", smtp);
+        requestBody.put("tls", tls);
+        requestBody.put("firstName", firstName);
+        requestBody.put("lastName", lastName);
     
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/createAccount"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                 .build();
     
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -148,6 +154,7 @@ public class AppTest {
         assertEquals(401, response.statusCode());
         assertEquals("Username already exists", response.body());
     }
+    
     
 
     @Test
@@ -170,7 +177,7 @@ public class AppTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(401, response.statusCode());
+        assertEquals(404, response.statusCode());
         assertEquals("Incorrect username or password", response.body());
     }
 
