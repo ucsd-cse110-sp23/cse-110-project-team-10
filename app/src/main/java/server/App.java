@@ -1,4 +1,4 @@
-package _MS2Demo;
+package server;
 
 import java.net.InetSocketAddress;
 import java.io.IOException;
