@@ -81,6 +81,7 @@ public class RequestHandle implements HttpHandler {
         Scanner scanner = new Scanner(inStream);
         String postData = scanner.nextLine();
 
+
         if (endpoint.equals("/createAccount")) {
             try {
                 JSONObject postJson = new JSONObject(postData);
@@ -94,7 +95,7 @@ public class RequestHandle implements HttpHandler {
                 // check if user already exists
                 Document existingUser = collection.find(Filters.eq("username", username)).first();
                 if (existingUser != null) {
-                    handleReturn(httpExchange, 400, "Username already exists");
+                    handleReturn(httpExchange, 401, "Username already exists");
 
                     scanner.close();
                     return;
@@ -104,7 +105,13 @@ public class RequestHandle implements HttpHandler {
                 Document newUser = new Document("_id", new ObjectId());
                 newUser.append("username", username)
                         .append("password", password)
-                        .append("history", new ArrayList<>());
+                        .append("history", new ArrayList<>())
+                        .append("email address", "")
+                        .append("email password", "")
+                        .append("SMTP", "")
+                        .append("TLS", "")
+                        .append("first name", "")
+                        .append("last name", "");
 
                 // add new user to the database
                 collection.insertOne(newUser);
@@ -245,7 +252,15 @@ public class RequestHandle implements HttpHandler {
 
                 System.out.println("Option " + userOption);
 
+                //create history to enter
+                JSONObject innerData = new JSONObject();
+                JSONObject jsonObject = new JSONObject();
+      
+        
+
                 if (userOption.equals("email")) {
+
+                    jsonObject.put("command", "email");
 
                     String message = "";
                     message = chatGPT.getAnswer("what is the message they want to send in the email, say only that message exactly and nothing else: " + response, 0.4, 16);
@@ -254,7 +269,23 @@ public class RequestHandle implements HttpHandler {
                     sender = chatGPT.getAnswer("What is the email in "+response, 0.4, 16);
 
                     System.out.println("emailing "+message+" to "+sender);
-                    handleReturn(httpExchange, 200, "OK: email");
+
+                    innerData.put("email", "emailing "+message+" to "+sender);
+                    jsonObject.put("data", innerData.toString());
+                
+                    // get the history of the user
+                    List<Document> history = (List<Document>) user.get("history");
+                
+                    // if history is empty, set id as 0, otherwise set it as the size of history (which is the next index)
+                    int id = history.isEmpty() ? 0 : history.size();
+                
+                    jsonObject.put("id", id);
+                
+                    // add new action to the user's history
+                    history.add(Document.parse(jsonObject.toString()));
+                
+                    // update the user's history in the database
+                    collection.updateOne(Filters.eq("username", username), Updates.set("history", history));
                 }
 
                 else if (userOption.equals("delete all")) {
@@ -275,7 +306,14 @@ public class RequestHandle implements HttpHandler {
                 }
 
                 else if (userOption.equals("delete this")) {
-                    handleReturn(httpExchange, 200, "OK: delete this");
+
+                    try{
+                        String historyID = postJson.getString("historyID");
+
+
+                    }catch (JSONException e) {
+                        handleReturn(httpExchange, 400, "Invalid JSON getting history to delte");
+                    }
                 }
 
                 else{
