@@ -59,7 +59,7 @@ class MockSetUpUI{
 		}
 		reader.close();
 
-        //new Update(firstName, lastName, displayName, emailAddress, emailPassword, SMTPHost, TLSPort);
+        new Update(firstName, lastName, displayName, emailAddress, emailPassword, SMTPHost, TLSPort);
 	}
 }
 
