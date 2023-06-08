@@ -33,11 +33,7 @@ public class AppTest {
         // start server thread
         executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            try {
-                App.main(new String[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            App.main(new String[0]);
         });
 
         // wait for server
