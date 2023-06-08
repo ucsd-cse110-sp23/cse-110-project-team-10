@@ -112,7 +112,7 @@ public class RequestHandler implements HttpHandler{
                 // login user
                 Document user = userService.loginUser(username, password);
                 if (user == null) {
-                    handleReturn(httpExchange, 401, "Incorrect username or password");
+                    handleReturn(httpExchange, 404, "Incorrect username or password");
                 } else {
                     handleReturn(httpExchange, 200, "User logged in successfully");
                 }

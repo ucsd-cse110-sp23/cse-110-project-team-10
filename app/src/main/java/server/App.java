@@ -57,7 +57,8 @@ public class App {
         // Initialize services
         UserService userService = new UserService(databaseService);
         EmailService emailService = new EmailService();
-        AudioService audioService = new AudioService();
+        
+        AudioService audioService = new AudioService(new Whisper(), new ChatGPT());
 
         // Declare endpoints
         server.createContext("/createAccount", new RequestHandler(userService, emailService, audioService, "/createAccount", mongoClient));
