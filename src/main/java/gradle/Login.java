@@ -16,192 +16,183 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import org.json.JSONObject;
 
 import javax.swing.JOptionPane;
 
-public class Login {
 
+public class Login {
+    
+    String uri = "mongodb+srv://haz042:Dan13697748680@lab7.nxlm4ex.mongodb.net/?retryWrites=true&w=majority";
     boolean emailEx;
     boolean passwordEx;
 
     public Login(String email, String password) {
 
-        try{
-
-        HttpClient client = HttpClient.newHttpClient();
-
-        JSONObject json = new JSONObject();
-        json.put("username", email);
-        json.put("password", password);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:3000/login"))
-                .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
 
 
-        if (response.statusCode() == 200) {
-            this.emailEx = true;
-            this.passwordEx = true;
-            File file = new File("credentials.txt");
+            MongoDatabase ProjectDB = mongoClient.getDatabase("Project");
+            MongoCollection<Document> userCollection = ProjectDB.getCollection("Email");
 
-            try {
-                Scanner scanner = new Scanner(file);
-                int count = 0;
-
-                // Count the number of strings
-                while (scanner.hasNext()) {
-                    scanner.next();
-                    count++;
-                }
-                scanner.close();
-                if (count == 1) {
-                    file.delete();
-                    String fileName = "credentials.txt";
-                    String content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name "
-                            + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password "
-                            + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
+            // Document user = new Document("_id", new ObjectId());
+            Document user = new Document("Email", email);
+            FindIterable<Document> results = userCollection.find(user);
+            boolean emailExists = results.iterator().hasNext();
+            this.emailEx = emailExists;
+            if (emailExists) {
+                Document userDoc = results.iterator().next();
+                String storedPassword = userDoc.getString("Password");
+                if (password.equals(storedPassword)) {
+                    this.passwordEx = true;
+                    File file = new File("credentials.txt");
+        
                     try {
-                        FileWriter fileWriter = new FileWriter(fileName);
-                        fileWriter.write(content);
-                        fileWriter.close();
-                        System.out.println("File created and content written successfully.");
-                    } catch (IOException e) {
-                        System.out.println("An error occurred while writing to the file.");
+                        Scanner scanner = new Scanner(file);
+                        int count = 0;
+                
+                        // Count the number of strings
+                        while (scanner.hasNext()) {
+                            scanner.next();
+                            count++;
+                        }
+                        scanner.close();
+                        if (count == 1) {
+                            file.delete();
+                            String fileName = "credentials.txt";
+                            String content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name " + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password " + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
+                            try {
+                                FileWriter fileWriter = new FileWriter(fileName);
+                                fileWriter.write(content);
+                                fileWriter.close();
+                                System.out.println("File created and content written successfully.");
+                            } catch (IOException e) {
+                                System.out.println("An error occurred while writing to the file.");
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
 
-            boolean automaticLogin = showAutomaticLoginDialog();
-            String content;
-            if (automaticLogin) {
+                    boolean automaticLogin = showAutomaticLoginDialog();
+                    String content;
+                    if (automaticLogin) {
 
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    String line = reader.readLine();
+                        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                            String line = reader.readLine();
+                
+                            if (line != null) {
+                                String[] values = line.split(" ");
+                
+                                // Store each value in separate variables
+                                String preEmail = values[1];
+                                String prePassword = values[2];
+                                String firstName = values[3];
+                                String lastName = values[4];
+                                String displayName = values[5];
+                                String emailAddress = values[6];
+                                String emailPassword = values[7];
+                                String SMTPHost = values[8];
+                                String TLSPort = values[9];
 
-                    if (line != null) {
-                        String[] values = line.split(" ");
+                                file.delete();
+                                String fileName = "credentials.txt";
+                                if (email != preEmail) {
+                                    content = "1 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name " + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password " + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
+                                }
+                                else {
+                                    content = "1 " + preEmail + " " + prePassword + " " + firstName + " " + lastName + " " + displayName + " " + emailAddress + " " + emailPassword + " " + SMTPHost + " " + TLSPort;
+                                }
 
-                        // Store each value in separate variables
-                        String preEmail = values[1];
-                        String prePassword = values[2];
-                        String firstName = values[3];
-                        String lastName = values[4];
-                        String displayName = values[5];
-                        String emailAddress = values[6];
-                        String emailPassword = values[7];
-                        String SMTPHost = values[8];
-                        String TLSPort = values[9];
-
-                        file.delete();
-                        String fileName = "credentials.txt";
-                        if (email != preEmail) {
-                            content = "1 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name "
-                                    + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password "
-                                    + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
-                        } else {
-                            content = "1 " + preEmail + " " + prePassword + " " + firstName + " " + lastName + " "
-                                    + displayName + " " + emailAddress + " " + emailPassword + " " + SMTPHost + " "
-                                    + TLSPort;
-                        }
-
-                        try {
-                            FileWriter fileWriter = new FileWriter(fileName);
-                            fileWriter.write(content);
-                            fileWriter.close();
-                            System.out.println("File created and content written successfully.");
+                                try {
+                                    FileWriter fileWriter = new FileWriter(fileName);
+                                    fileWriter.write(content);
+                                    fileWriter.close();
+                                    System.out.println("File created and content written successfully.");
+                                } catch (IOException e) {
+                                    System.out.println("An error occurred while writing to the file.");
+                                    e.printStackTrace();
+                                }
+                
+                            } else {
+                                System.out.println("File is empty.");
+                            }
                         } catch (IOException e) {
-                            System.out.println("An error occurred while writing to the file.");
-                            e.printStackTrace();
+                            System.out.println("Error reading the file: " + e.getMessage());
                         }
 
+                        JOptionPane.showMessageDialog(null, "Logged in successfully! Automatic login enabled.");
                     } else {
-                        System.out.println("File is empty.");
-                    }
-                } catch (IOException e) {
-                    System.out.println("Error reading the file: " + e.getMessage());
-                }
 
-                JOptionPane.showMessageDialog(null, "Logged in successfully! Automatic login enabled.");
-            } else {
+                        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                            String line = reader.readLine();
+                
+                            if (line != null) {
+                                String[] values = line.split(" ");
+                
+                                // Store each value in separate variables
+                                String preEmail = values[1];
+                                String prePassword = values[2];
+                                String firstName = values[3];
+                                String lastName = values[4];
+                                String displayName = values[5];
+                                String emailAddress = values[6];
+                                String emailPassword = values[7];
+                                String SMTPHost = values[8];
+                                String TLSPort = values[9];
 
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    String line = reader.readLine();
+                                file.delete();
+                                String fileName = "credentials.txt";
+                                if (email != preEmail) {
+                                    content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name " + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password " + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
+                                }
+                                else {
+                                    content = "0 " + preEmail + " " + prePassword + " " + firstName + " " + lastName + " " + displayName + " " + emailAddress + " " + emailPassword + " " + SMTPHost + " " + TLSPort;
+                                }
 
-                    if (line != null) {
-                        String[] values = line.split(" ");
-
-                        // Store each value in separate variables
-                        String preEmail = values[1];
-                        String prePassword = values[2];
-                        String firstName = values[3];
-                        String lastName = values[4];
-                        String displayName = values[5];
-                        String emailAddress = values[6];
-                        String emailPassword = values[7];
-                        String SMTPHost = values[8];
-                        String TLSPort = values[9];
-
-                        file.delete();
-                        String fileName = "credentials.txt";
-                        if (email != preEmail) {
-                            content = "0 " + email + " " + password + " " + "Fill_in_first_name " + "Fill_in_last_name "
-                                    + "Fill_in_display_name " + "Fill_in_email_address " + "Fill_in_email_password "
-                                    + "Fill_in_SMTP_host " + "Fill_in_TLS_port";
-                        } else {
-                            content = "0 " + preEmail + " " + prePassword + " " + firstName + " " + lastName + " "
-                                    + displayName + " " + emailAddress + " " + emailPassword + " " + SMTPHost + " "
-                                    + TLSPort;
-                        }
-
-                        try {
-                            FileWriter fileWriter = new FileWriter(fileName);
-                            fileWriter.write(content);
-                            fileWriter.close();
-                            System.out.println("File created and content written successfully.");
+                                try {
+                                    FileWriter fileWriter = new FileWriter(fileName);
+                                    fileWriter.write(content);
+                                    fileWriter.close();
+                                    System.out.println("File created and content written successfully.");
+                                } catch (IOException e) {
+                                    System.out.println("An error occurred while writing to the file.");
+                                    e.printStackTrace();
+                                }
+                
+                            } else {
+                                System.out.println("File is empty.");
+                            }
                         } catch (IOException e) {
-                            System.out.println("An error occurred while writing to the file.");
-                            e.printStackTrace();
+                            System.out.println("Error reading the file: " + e.getMessage());
                         }
 
-                    } else {
-                        System.out.println("File is empty.");
+                        JOptionPane.showMessageDialog(null, "Logged in successfully! Automatic login disabled.");
                     }
-                } catch (IOException e) {
-                    System.out.println("Error reading the file: " + e.getMessage());
+                    try {
+                        new AppFrame();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } 
                 }
-
-                JOptionPane.showMessageDialog(null, "Logged in successfully! Automatic login disabled.");
+                else {
+                    JOptionPane.showMessageDialog(null, "Invalid Password");
+                }
+                
             }
-            try {
-                new AppFrame();
-            } catch (Exception e) {
-                e.printStackTrace();
+            else {
+                JOptionPane.showMessageDialog(null, "Email doesn't exists");
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Invalid Password");
+            
         }
-        } catch(Exception e){
-            JOptionPane.showMessageDialog(null, "Server Error");
+        catch (Exception e) {
+            e.printStackTrace();
         }
-
     }
 
     public boolean showAutomaticLoginDialog() {
-        int choice = JOptionPane.showConfirmDialog(null, "Do you want to enable automatic login?", "Automatic Login",
-                JOptionPane.YES_NO_OPTION);
+        int choice = JOptionPane.showConfirmDialog(null, "Do you want to enable automatic login?", "Automatic Login", JOptionPane.YES_NO_OPTION);
         return choice == JOptionPane.YES_OPTION;
-    }
+	}
 
 }
